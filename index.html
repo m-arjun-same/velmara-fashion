@@ -8,24 +8,31 @@
 <meta name="description" content="VELMARA is a fashion atelier. Thread to Runway — fabrics change, tools change; only the will to be seen stays the same.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Jost:wght@300;400;500&family=Pinyon+Script&family=Shippori+Mincho+B1:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&family=Shippori+Mincho+B1:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=3">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 </head>
 <body>
 
-<!-- 1. LOADER -->
+<!-- LOADER -->
 <div id="loader" aria-hidden="true">
-  <div class="ld-pct-frame"><span id="ldnum">1</span><span class="ld-pct-sign">%</span></div>
-  <div class="ld-word">LOADING</div>
-  <div class="ld-logo script">Velmara</div>
-  <div class="ld-clock"><span class="js-clock">--:--</span> (JST)<br><span class="js-hour">The Hour of —</span></div>
+  <canvas id="ldBurn"></canvas>
+  <div class="ld-ui">
+    <div class="ld-pct-frame"><span id="ldnum">1</span><span class="ld-pct-sign">%</span></div>
+    <div class="ld-word">LOADING</div>
+    <div class="ld-logo script">Velmara</div>
+    <div class="ld-clock"><span class="js-clock">--:--</span> (JST)<br><span class="js-hour">The Hour of —</span></div>
+  </div>
 </div>
 
-<!-- 2. HEADER -->
+<!-- shader crossfade + grain overlays -->
+<canvas id="warp" aria-hidden="true"></canvas>
+<canvas id="grain" aria-hidden="true"></canvas>
+
+<!-- HEADER -->
 <header class="site" id="siteHeader">
   <div class="hd-left">
-    <a class="logo script" href="#hero">Velmara</a>
+    <a class="logo script" href="#" data-goto="0">Velmara</a>
     <div class="letterhead" id="letterhead">
       <div class="lh-lines">VELMARA — Fashion Atelier<br>Thread to Runway<br>Editorial / Design / Creative Direction</div>
     </div>
@@ -35,7 +42,7 @@
       <div class="lh-clock">Current Time in Tokyo, Japan: <span class="js-clock">--:--</span> (JST)<br><span class="js-hour">The Hour of —</span></div>
       <div class="lh-actions">
         <button id="soundBtn" type="button" aria-pressed="true">SOUND ON</button>
-        <a class="lh-contact" href="#contact">CONTACT US</a>
+        <a class="lh-contact" href="#" data-goto="6">CONTACT US</a>
       </div>
     </div>
     <button id="menuBtn" type="button">MENU</button>
@@ -48,12 +55,12 @@
   <div class="menu-main">
     <div class="menu-serif"><span class="grey">Tools Change.</span><br>Where Will You Go Next?</div>
     <nav class="menu-grid">
-      <a href="#hero"><span>TOP</span><i>→</i></a>
-      <a href="#works"><span>WORKS</span><i>→</i></a>
-      <a href="#flow"><span>FLOW</span><i>→</i></a>
-      <a href="#about"><span>ABOUT</span><i>→</i></a>
-      <a href="#approach"><span>APPROACH</span><i>→</i></a>
-      <a href="#contact"><span>CONTACT</span><i>→</i></a>
+      <a href="#" data-goto="0"><span>TOP</span><i>→</i></a>
+      <a href="#" data-goto="2"><span>WORKS</span><i>→</i></a>
+      <a href="#" data-goto="5"><span>FLOW</span><i>→</i></a>
+      <a href="#" data-goto="1"><span>ABOUT</span><i>→</i></a>
+      <a href="#" data-goto="3"><span>APPROACH</span><i>→</i></a>
+      <a href="#" data-goto="6"><span>CONTACT</span><i>→</i></a>
     </nav>
     <div class="menu-foot">
       <span>Current Time in Tokyo, Japan: <span class="js-clock">--:--</span> (JST) — <span class="js-hour">The Hour of —</span></span>
@@ -62,20 +69,22 @@
     </div>
   </div>
   <aside class="menu-sources">
-    <div class="src-head">SOURCES</div>
-    <div class="src-item"><b>Look 01 — Ivory Column Dress</b><p>Shot on medium format in the atelier garden. Silk organza, hand-rolled hems; the silhouette is cut on the bias so the cloth keeps moving a breath after the wearer stops.</p></div>
-    <div class="src-item"><b>Look 02 — Scarlet Tailoring</b><p>A single-button jacket in double-faced wool. The lapel is drafted from a 1962 pattern block kept in the house archive, re-cut each season by hand.</p></div>
-    <div class="src-item"><b>Look 03 — The Night Rail</b><p>Evening pieces photographed after closing, on the shop's own rail. Lamé and devoré velvet, lit only by the window so the fabric decides the exposure.</p></div>
-    <div class="src-item"><b>Textile Notes — Indigo &amp; Madder</b><p>Our dye studio works with natural indigo and madder root. Each bolt is dipped, dried and dipped again until the colour sits inside the fibre, not on it.</p></div>
-    <div class="src-item"><b>On the Makers</b><p>Fourteen hands touch every Velmara garment: cutter, machinist, hand-finisher, presser. Their names are sewn into the inside pocket of each piece that leaves the atelier.</p></div>
-    <div class="src-item"><b>Archive — Season 01 to 19</b><p>The house archive holds one of every look ever shown. Pieces return from the archive for repair at any age, free of charge, for the life of the garment.</p></div>
-    <div class="src-item"><b>Photography</b><p>All campaign photographs are made in-house on film. No retouching is applied to the body; only dust is removed from the scan.</p></div>
+    <div class="src-view" id="srcView"><div class="src-in" id="srcIn">
+      <div class="src-head">SOURCES</div>
+      <div class="src-item"><b>Look 01 — Ivory Column Dress</b><p>Shot on medium format in the atelier garden. Silk organza, hand-rolled hems; the silhouette is cut on the bias so the cloth keeps moving a breath after the wearer stops.</p></div>
+      <div class="src-item"><b>Look 02 — Scarlet Tailoring</b><p>A single-button jacket in double-faced wool. The lapel is drafted from a 1962 pattern block kept in the house archive, re-cut each season by hand.</p></div>
+      <div class="src-item"><b>Look 03 — The Night Rail</b><p>Evening pieces photographed after closing, on the shop's own rail. Lamé and devoré velvet, lit only by the window so the fabric decides the exposure.</p></div>
+      <div class="src-item"><b>Textile Notes — Indigo &amp; Madder</b><p>Our dye studio works with natural indigo and madder root. Each bolt is dipped, dried and dipped again until the colour sits inside the fibre, not on it.</p></div>
+      <div class="src-item"><b>On the Makers</b><p>Fourteen hands touch every Velmara garment: cutter, machinist, hand-finisher, presser. Their names are sewn into the inside pocket of each piece that leaves the atelier.</p></div>
+      <div class="src-item"><b>Archive — Season 01 to 19</b><p>The house archive holds one of every look ever shown. Pieces return from the archive for repair at any age, free of charge, for the life of the garment.</p></div>
+      <div class="src-item"><b>Photography</b><p>All campaign photographs are made in-house on film. No retouching is applied to the body; only dust is removed from the scan.</p></div>
+    </div></div>
   </aside>
 </div>
 
 <main>
-<!-- 3. HERO -->
-<section id="hero" data-theme="light">
+<!-- CH 0 · HERO -->
+<section class="chapter" id="hero" data-theme="light">
   <canvas id="petals"></canvas>
   <div class="hero-frame" id="heroFrame">
     <span class="br tl"></span><span class="br tr"></span><span class="br bl"></span><span class="br br2"></span>
@@ -88,244 +97,254 @@
     <div class="splash"></div>
     <img src="assets/img/img13.jpg" alt="Black and white back view">
   </div>
-  <div class="hero-caps">A Fashion Atelier — From a Single Thread</div>
+  <div class="hero-caps">Only the Will Stays Human.</div>
   <h1 class="hero-title"><span class="t-line">THREAD</span><span class="t-line"><em class="to-badge">to</em>RUNWAY</span></h1>
   <button id="chgBtn" type="button"><span>Change!</span></button>
 </section>
 
-<!-- 4. ABOUT -->
-<section id="about" data-theme="dark">
-  <img class="about-bg" src="assets/img/img04.jpg" alt="" aria-hidden="true">
+<!-- CH 1 · ABOUT -->
+<section class="chapter" id="about" data-theme="dark">
+  <img class="about-bg" id="aboutBg" src="assets/img/img04.jpg" alt="" aria-hidden="true">
   <div class="about-in">
     <div class="about-title">ABOUT<em class="script">Total Creation.</em></div>
-    <h2 class="about-h serif">情報を束ね、纏う人の想いをカタチにする。</h2>
+    <h2 class="about-h serif">A team that understands intent — and designs value.</h2>
     <div class="rule"></div>
     <div class="about-cols">
-      <p class="serif">一本の糸は、まだ何ものでもありません。誰が纏い、どこへ歩き、何を見せたいのか。その想いを丁寧に束ねたとき、糸は初めて服になります。私たちは、素材の声に耳を澄まし、身体の線を読み、時代の空気を取り込みながら、一着の輪郭を決めていきます。装うことは、言葉より先に届く自己紹介です。</p>
-      <p class="en">A single thread is not yet anything. Who will wear it, where will they walk, what do they wish to say — only when that intent is gathered with care does thread become a garment. We listen to the cloth, read the line of the body, and take in the air of the age, until one silhouette stands. To dress is an introduction that arrives before words.</p>
+      <p class="serif">A single thread is not yet anything. Who will wear it, where will they walk, what do they wish to say before a word is spoken? We gather that intent the way a cutter gathers cloth — carefully, without waste — listening to the material, reading the line of the body, and taking in the air of the age, until one silhouette stands. To dress is an introduction that arrives before words.</p>
+      <p class="en">Fourteen hands touch every garment that leaves this house. We organise the maker's knowledge, the cloth's character and the wearer's wish into one flow, and we do not call a piece finished until all three agree. That is the whole of our method, and it has not changed in nineteen seasons.</p>
     </div>
     <div class="scroll-hint">SCROLL ↓</div>
   </div>
 </section>
 
-<!-- 5. WORKS -->
-<section id="works" data-theme="light">
-  <div class="wk-sticky">
-    <div class="wk-framebar top"></div>
-    <div class="wk-collage" id="wkCollage">
-      <img src="assets/img/img01.jpg" alt=""><img src="assets/img/img07.jpg" alt=""><img src="assets/img/img10.jpg" alt=""><img src="assets/img/img12.jpg" alt=""><img src="assets/img/img02.jpg" alt=""><img src="assets/img/img09.jpg" alt=""><img src="assets/img/img14.jpg" alt="">
-    </div>
-    <div id="wkTrack">
-      <article class="case">
-        <div class="stack"><img src="assets/img/img06.jpg" alt="Editorial campaign look"><img src="assets/img/img11.jpg" alt="Editorial detail"><img src="assets/img/img01.jpg" alt="Editorial look"></div>
-        <div class="case-text">
-          <div class="cat">Official Campaign / Artist Experience</div>
-          <h3 class="serif">音楽の余韻を、そのまま纏う。</h3>
-          <div class="sub">Carrying the resonance of music, worn untouched.</div>
-          <div class="case-body"><p>演奏家の静かな存在感を大切にし、余韻が自然と伝わる一着を目指しました。デザインが前に出過ぎず、着る人の魅力を静かに引き立てます。</p><p class="en">Honouring the quiet presence of a performer, we made garments whose afterglow carries naturally. The design never steps forward; it quietly elevates the person inside it.</p></div>
-          <button class="viewmore" type="button" data-case="0">VIEW MORE</button>
-        </div>
-      </article>
-      <article class="case">
-        <div class="stack"><img src="assets/img/img08.jpg" alt="Creative direction look"><img src="assets/img/img07.jpg" alt="Label direction detail"><img src="assets/img/img17.jpg" alt="Direction look"></div>
-        <div class="case-text">
-          <div class="cat">Strategy / Creative Direction</div>
-          <h3 class="serif">季節を読み、成長の戦略を描く。</h3>
-          <div class="sub">Read the season, draw the strategy for growth.</div>
-          <div class="case-body"><p>市場を読み、ブランドの成長戦略を立案。衣服だけでなく、パッケージやルックブック、映像まで一つのデザインで統一し、あらゆる接点で同じ世界観を届けます。</p><p class="en">We read the market and shaped the label's growth strategy. One design language runs through garments, packaging, lookbooks and film, so every touchpoint delivers the same world.</p></div>
-          <button class="viewmore" type="button" data-case="1">VIEW MORE</button>
-        </div>
-      </article>
-      <article class="case">
-        <div class="stack"><img src="assets/img/img02.jpg" alt="Capsule drop shopping"><img src="assets/img/img09.jpg" alt="Capsule collection rail"><img src="assets/img/img18.jpg" alt="Capsule look"></div>
-        <div class="case-text">
-          <div class="cat">EC Site / Capsule Drop</div>
-          <h3 class="serif">世界観と欲望を、ひとつの流れへ。</h3>
-          <div class="sub">Worldview and desire, in one seamless flow.</div>
-          <div class="case-body"><p>香りのように漂うコレクションの空気感を丁寧に整理し、感性に届く購買体験を構築。閲覧から購入まで滞りのない流れで、共感と成果を両立させました。</p><p class="en">We distilled the atmosphere of the collection into a buying experience that speaks to the senses — a frictionless path from first look to purchase that balances desire with results.</p></div>
-          <button class="viewmore" type="button" data-case="2">VIEW MORE</button>
-        </div>
-      </article>
-    </div>
-    <div class="wk-gauge"><span id="wkCur">01</span><span class="gbar"><i id="wkBar"></i></span><span>03</span></div>
-    <div class="wk-framebar bot"></div>
+<!-- CH 2 · WORKS -->
+<section class="chapter" id="works" data-theme="light">
+  <div class="wk-framebar top"></div>
+  <div class="wk-collage" id="wkCollage">
+    <img src="assets/img/img01.jpg" alt=""><img src="assets/img/img07.jpg" alt=""><img src="assets/img/img10.jpg" alt=""><img src="assets/img/img12.jpg" alt=""><img src="assets/img/img02.jpg" alt=""><img src="assets/img/img09.jpg" alt=""><img src="assets/img/img14.jpg" alt="">
   </div>
+  <div id="wkTrack">
+    <article class="case">
+      <div class="stack"><img src="assets/img/img06.jpg" alt="Editorial campaign look"><img src="assets/img/img11.jpg" alt="Editorial detail"><img src="assets/img/img01.jpg" alt="Editorial look"></div>
+      <div class="case-text">
+        <div class="cat">Official Campaign / Artist Experience</div>
+        <h3 class="serif">The Resonance of Music, Worn Untouched.</h3>
+        <div class="sub">Bringing the afterglow of a performance to the web — and to cloth — exactly as it was felt.</div>
+        <div class="case-txt"><div class="case-txt-in">
+          <p>Honouring the quiet presence of a performer, we made garments whose afterglow carries naturally from the stage into the street. The design never steps forward; it is composed to quietly elevate the person inside it, the way a good hall elevates a single note without ever being heard itself.</p>
+          <p class="en">The campaign was shot over two days in natural light, following one wearer the way a recital follows one theme. Nothing staged steps in front of the garment. The series ran as a print editorial and a digital lookbook, and the featured coat — cut from a single bolt of double-faced wool — sold out in nine days.</p>
+          <p>Every seam in the collection is finished by hand, so the inside of the garment reads as calmly as the outside. A performer notices such things in the wings, in the thirty seconds before the lights change.</p>
+        </div></div>
+        <button class="viewmore" type="button" data-case="0">VIEW MORE</button>
+      </div>
+    </article>
+    <article class="case">
+      <div class="stack"><img src="assets/img/img08.jpg" alt="Creative direction look"><img src="assets/img/img07.jpg" alt="Label direction detail"><img src="assets/img/img17.jpg" alt="Direction look"></div>
+      <div class="case-text">
+        <div class="cat">Strategy / Creative Direction</div>
+        <h3 class="serif">Read the Season, Draw the Strategy for Growth.</h3>
+        <div class="sub">One design language, running from the garment to the lookbook to the film.</div>
+        <div class="case-txt"><div class="case-txt-in">
+          <p>We read the market the way we read a rail of samples — by hand, piece by piece — and shaped the label's direction for three seasons ahead. Beyond the clothes, one design runs through packaging, print and film, so every customer touchpoint delivers the same world.</p>
+          <p class="en">The strategy began with listening: forty hours of conversations with the women who already wore the label, and the ones who had stopped. What returned was not a new logo but a new order — fewer pieces, better cloth, and a calendar that follows the wearer's year instead of the industry's.</p>
+          <p>Direction is a promise kept at a distance. Every artefact the house releases — a tag, a bag, a thirty-second film — is checked against the same three questions before it leaves the studio.</p>
+        </div></div>
+        <button class="viewmore" type="button" data-case="1">VIEW MORE</button>
+      </div>
+    </article>
+    <article class="case">
+      <div class="stack"><img src="assets/img/img02.jpg" alt="Capsule drop shopping"><img src="assets/img/img09.jpg" alt="Capsule collection rail"><img src="assets/img/img18.jpg" alt="Capsule look"></div>
+      <div class="case-text">
+        <div class="cat">EC Site / Capsule Drop</div>
+        <h3 class="serif">Worldview and Desire, in One Seamless Flow.</h3>
+        <div class="sub">An e-commerce experience that speaks to the senses before it speaks of price.</div>
+        <div class="case-txt"><div class="case-txt-in">
+          <p>We distilled the atmosphere of the collection into a buying experience that keeps the world intact from first look to final confirmation — a frictionless path that balances empathy for the brand with hard results at the till.</p>
+          <p class="en">The drop page opens on cloth, not on chrome: a full-bleed film of the fabric moving, then the pieces, then — only then — the sizes. Checkout was reduced to three gestures. Nothing in the flow asks a question the house does not need answered.</p>
+          <p>When the capsule sold through, the page did not close; it became the archive entry for the season, so the world of the collection stays visitable long after the last piece has gone.</p>
+        </div></div>
+        <button class="viewmore" type="button" data-case="2">VIEW MORE</button>
+      </div>
+    </article>
+  </div>
+  <div class="wk-gauge"><span id="wkCur">01</span><span class="gbar"><i id="wkBar"></i></span><span>03</span></div>
+  <div class="wk-framebar bot"></div>
 </section>
 
 <div id="modal" role="dialog" aria-modal="true">
   <div class="modal-box">
     <img id="mImg" src="assets/img/img06.jpg" alt="Case image">
-    <div class="cat" id="mCat"></div>
-    <h3 id="mTitle" class="serif"></h3><p id="mBody"></p>
+    <div class="modal-view" id="modalView"><div class="modal-in" id="modalIn">
+      <div class="cat" id="mCat"></div>
+      <h3 id="mTitle" class="serif"></h3><p id="mBody"></p>
+    </div></div>
     <button id="modalClose" type="button">CLOSE</button>
   </div>
 </div>
 
-<!-- 6. APPROACH INTRO -->
-<section id="approach" data-theme="light">
-  <span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span>
-  <div class="ap-label">A P P R O A C H</div>
-  <h2 class="ap-big serif">Design begins<br>with <em>alignment.</em></h2>
-  <p class="ap-sub serif">制作へのアプローチ</p>
-  <p class="ap-body fade">良いデザインは、見た目から生まれるものではありません。事業の想い、届けたい価値、そして着る人の視点。それぞれを丁寧に整え、一つの流れとして繋げることで、伝わる形が生まれます。<br><span class="en">Great design is not born from appearance alone. The intent of the house, the value to deliver, and the wearer's point of view — aligning each with care is what gives rise to a form that communicates.</span></p>
-  <div class="ap-scroll">SCROLL →</div>
-</section>
-
-<!-- APPROACH STEPS (pinned horizontal) -->
-<section id="apSteps" data-theme="light">
-  <div class="ap-sticky">
+<!-- CH 3 · APPROACH (intro + steps) -->
+<section class="chapter" id="approach" data-theme="light">
+  <div class="ap-phase ap-intro" id="apIntro">
+    <span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span>
+    <div class="ap-label">A P P R O A C H</div>
+    <h2 class="ap-big serif">Design begins<br>with <em>alignment.</em></h2>
+    <p class="ap-body">Great design is not born from appearance alone. The intent of the house, the value to deliver, and the wearer's point of view — aligning each with care and joining them into one flow is what gives rise to a form that communicates. We organise information, look to the essence, and design experiences that carry into the future.</p>
+    <div class="ap-scroll">SCROLL →</div>
+  </div>
+  <div class="ap-phase ap-steps" id="apStepsPh">
     <canvas id="apPetals"></canvas>
     <div class="ap-arc"></div>
     <div id="apTrack">
       <article class="ap-step">
-        <div class="cat">01 / Direction</div>
-        <h3 class="serif">情報と人をつなぎ、<br>コレクションを前へ進める</h3>
-        <p>事業の想いや課題を整理し、関わる人たちの認識を一つにすることから制作は始まります。ヒアリングから設計、進行管理までを一貫して行い、目的へ向かう流れを整えます。</p>
-        <p class="en">Production begins by organising intent — bringing everyone involved to one understanding, from first hearing through planning and management.</p>
+        <div class="cat">01 / Management · Direction</div>
+        <h3 class="serif">Connecting People and Information, Moving the Collection Forward.</h3>
+        <p>Production begins by organising the intent and the challenges of the house, and bringing everyone involved to one understanding. From first hearing through planning and management, we shape the flow toward the goal and keep the whole collection moving.</p>
+        <p class="en">A collection is a hundred small decisions wearing one name. Direction is the work of keeping them in conversation.</p>
       </article>
       <article class="ap-step">
         <div class="cat">02 / Design</div>
-        <h3 class="serif">想いを、纏える形へ。</h3>
-        <p>デザインは装飾ではなく、価値を伝えるための手段です。ブランドの個性や目的を整理し、伝えるべき本質を、身体の上で生きる視覚的な体験として形にします。</p>
-        <p class="en">Design is not decoration; it is a means of conveying value — the essence of the house, given a form the body can live in.</p>
+        <h3 class="serif">Intent, Given a Form That Can Be Worn.</h3>
+        <p>Design is not decoration; it is a means of conveying value. We organise the character and purpose of the house, and give the essence a form as a visual — and physical — experience, cut for a body that actually moves.</p>
+        <p class="en">The toile comes before the cloth, and the fitting comes before the photograph. A form is only finished when it survives both.</p>
       </article>
       <article class="ap-step">
         <div class="cat">03 / Storytelling</div>
-        <h3 class="serif">伝わらない価値を、<br>伝わる言葉へ。</h3>
-        <p>事業の魅力や強みを整理し、ターゲットに届く表現へと再構築します。言葉、写真、映像 — 成果につながるコンテンツを設計します。</p>
-        <p class="en">We organise the appeal of a collection and rebuild it into expressions that reach their audience — words, photographs and film designed to be remembered.</p>
+        <h3 class="serif">Value That Never Landed, Rebuilt Into Words That Do.</h3>
+        <p>We organise the appeal and the strengths of a collection and rebuild them into expressions that reach their audience — designing content, from the lookbook to the thirty-second film, that leads to results and stays in memory.</p>
+        <p class="en">Words are the last fitting. If the story does not sit on the reader the way the garment sits on the wearer, it goes back to the table.</p>
       </article>
     </div>
     <div class="ap-dots"><i class="on"></i><i></i><i></i></div>
   </div>
 </section>
 
-<!-- 7. PHILOSOPHY / OMOI -->
-<section id="omoi" data-theme="dark">
-  <div id="burn" aria-hidden="true"></div>
+<!-- CH 4 · PHILOSOPHY -->
+<section class="chapter" id="omoi" data-theme="dark">
+  <canvas id="omoiBurn"></canvas>
   <div class="omoi-in">
-    <div class="omoi-kanji serif">装</div>
+    <div class="omoi-word script">Style</div>
     <div class="omoi-lines">
-      <div class="oline fade"><p class="serif">情報を整理し、纏う人の想いをカタチにする。</p><span>We organise cloth and intent, and give the wearer's feelings a form.</span></div>
-      <div class="oline fade"><p class="serif">デザインとは、単に美しいものをつくる仕事ではなく、「伝えること」を支える仕事です。</p><span>Design is not the making of beautiful things; it is work that supports expression.</span></div>
-      <div class="oline fade"><p class="serif">人が考え、AIが支える。時代が変わっても、人の想いに耳を傾けることが、私たちの変わらない役割です。</p><span>People think; AI supports. In every era, listening stays our role.</span></div>
-      <div class="oline fade"><p class="serif">これからも一つひとつのご縁を大切に、纏う人の想いをカタチにしてまいります。</p><span>We will keep shaping what each wearer wishes to say — one garment, one encounter at a time.</span></div>
+      <div class="oline"><p class="serif">We organise cloth and intent, and give the wearer's heart a form.</p><span>Nearly twenty years have passed since this house began working in design — and one conviction has stayed with us through every season.</span></div>
+      <div class="oline"><p class="serif">Design is not simply the making of beautiful things.</p><span>It is work that supports expression: we find the value that truly needs to be conveyed, and shape it to fit each wearer, each occasion, each life.</span></div>
+      <div class="oline"><p class="serif">People think; machines support.</p><span>Today, new tools are changing the very nature of making. We take that change not as a threat but as possibility — experience and sensibility, working with new hands.</span></div>
+      <div class="oline"><p class="serif">Whatever the era, our role does not change.</p><span>Listening to people's intent, organising it, and shaping it into a form that communicates — one garment, one encounter at a time.</span></div>
     </div>
   </div>
 </section>
 
-<!-- 8. ALIGN THE FLOW -->
-<section id="flowIntro" data-theme="dark">
-  <svg class="phoenix" viewBox="0 0 300 300" fill="none" stroke="#f2f0ec" stroke-width="1.4" aria-hidden="true">
-    <path d="M150 270 C120 210 60 190 30 120 C70 150 95 150 120 140 C90 110 80 70 100 30 C115 70 135 90 155 105 C150 70 165 40 195 25 C185 60 190 85 205 105 C235 90 255 95 275 120 C240 130 225 150 215 175 C240 175 260 190 272 215 C235 215 205 235 185 262 C172 278 158 282 150 270 Z"/>
-    <circle cx="168" cy="96" r="3.2" fill="#d7141a" stroke="none"/>
-    <path d="M120 140 C150 165 185 168 215 175"/>
-    <path d="M100 30 C130 90 150 140 155 200"/>
-  </svg>
-  <div class="cross c1"></div><div class="cross c2"></div>
-  <h2 class="flow-title"><span class="ft-the script">The</span><span>ALIGN</span><span>FLOW</span></h2>
-  <div class="flow-spine"><i></i><span class="dot"></span></div>
-  <div class="scroll-hint light">SCROLL ↓</div>
-</section>
-
-<section id="flow" data-theme="dark">
-  <div class="fl-sticky">
+<!-- CH 5 · FLOW (intro + steps) -->
+<section class="chapter" id="flow" data-theme="dark">
+  <div class="fl-phase fl-intro" id="flIntro">
+    <svg class="phoenix" viewBox="0 0 300 300" fill="none" stroke="#f2f0ec" stroke-width="1.4" aria-hidden="true">
+      <path d="M150 270 C120 210 60 190 30 120 C70 150 95 150 120 140 C90 110 80 70 100 30 C115 70 135 90 155 105 C150 70 165 40 195 25 C185 60 190 85 205 105 C235 90 255 95 275 120 C240 130 225 150 215 175 C240 175 260 190 272 215 C235 215 205 235 185 262 C172 278 158 282 150 270 Z"/>
+      <circle cx="168" cy="96" r="3.2" fill="#d7141a" stroke="none"/>
+      <path d="M120 140 C150 165 185 168 215 175"/>
+      <path d="M100 30 C130 90 150 140 155 200"/>
+    </svg>
+    <div class="cross c1"></div><div class="cross c2"></div>
+    <h2 class="flow-title"><span class="ft-the script">The</span><span>ALIGN</span><span>FLOW</span></h2>
+    <div class="flow-spine"><i></i><span class="dot"></span></div>
+    <div class="scroll-hint light">SCROLL</div>
+  </div>
+  <div class="fl-phase fl-steps" id="flStepsPh">
     <canvas id="flGl"></canvas>
     <div class="fl-warp" id="flWarp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
     <article class="fl-slide s0 act">
       <div class="fl-no">1 / 04</div>
-      <h3 class="serif">素材と想いを、整える。</h3>
-      <div class="fl-caps">ALIGN THE MATERIAL</div>
-      <p>事業の想い、届けたい価値、着る人の視点。それぞれを丁寧に整理し、一つの流れへと束ねることから、すべては始まります。<span class="en">The intent of the house, the value to deliver, the wearer's point of view — everything begins by aligning them into one flow.</span></p>
+      <h3 class="serif">Find the Essence of the House.</h3>
+      <div class="fl-caps">FIND THE ESSENCE OF THE BRAND.</div>
+      <p>The intent of the house, the value to deliver, the wearer's point of view — everything begins by aligning them into one flow, and removing everything that does not belong to it.<span class="en">Essence is not found by adding. It is what remains when the unnecessary has been respectfully shown the door.</span></p>
     </article>
     <article class="fl-slide s1 alt">
       <div class="fl-no">2 / 04</div>
-      <h3 class="serif">輪郭を、描く。</h3>
-      <div class="fl-caps">DRAW THE SILHOUETTE</div>
-      <p>整えられた想いは、線になります。身体の動きを読み、布の落ち方を計算し、輪郭が静かに立ち上がる瞬間を待ちます。<span class="en">Aligned intent becomes a line. We read the body's movement and the fall of cloth, and wait for the silhouette to rise.</span></p>
+      <h3 class="serif">Design the Experience.</h3>
+      <div class="fl-caps">DESIGN THE EXPERIENCE.</div>
+      <p>Aligned intent becomes a line. We read the body's movement and the fall of cloth, and wait for the silhouette to rise — then we build every touchpoint around that single rising line.<span class="en">A garment is experienced in motion, in mirrors, in the memory of a room. We design for all three.</span></p>
     </article>
     <article class="fl-slide s2">
       <div class="fl-no">3 / 04</div>
-      <h3 class="serif">手の仕事で、仕上げる。</h3>
-      <div class="fl-caps">FINISH BY HAND</div>
-      <p>縫い目の一つひとつに、作り手の判断が宿ります。機械の速さではなく、手の確かさで仕上げることが、着心地の差になります。<span class="en">Every seam holds a maker's decision. Finished by the certainty of hands, not the speed of machines — that is the difference you feel.</span></p>
+      <h3 class="serif">Build the World Around It.</h3>
+      <div class="fl-caps">ARCHITECT THE WORLD.</div>
+      <p>Every seam holds a maker's decision. Finished by the certainty of hands, not the speed of machines — and surrounded by a world of image, word and space that tells the same story.<span class="en">The world is the second garment: the one the collection wears in public.</span></p>
     </article>
     <article class="fl-slide s3 alt">
       <div class="fl-no">4 / 04</div>
-      <h3 class="serif">世界へ、放つ。</h3>
-      <div class="fl-caps">RELEASE TO THE WORLD</div>
-      <p>仕上がった一着は、ランウェイから日常へ。纏う人の物語の一部として、新しい場所で呼吸を始めます。<span class="en">The finished garment travels from runway to everyday life, and begins to breathe as part of its wearer's story.</span></p>
+      <h3 class="serif">Make It Keep Running.</h3>
+      <div class="fl-caps">BUILD WHAT KEEPS RUNNING.</div>
+      <p>The finished garment travels from runway to everyday life, and the system behind it keeps travelling too — repair, archive, and a new season already listening for its wearer.<span class="en">A house is not a collection. It is a mechanism for making the next one better.</span></p>
     </article>
     <div class="fl-gauge"><span id="flCur">01</span><span class="gbar"><i id="flBar"></i></span><span>04</span></div>
   </div>
 </section>
 
-<!-- 9. DATA -->
-<section id="data" data-theme="light">
-  <div class="data-frame">
-    <div class="data-letter">
-      <span class="script">Velmara</span>
-      <span class="dl-lines">VELMARA — Fashion Atelier / Thread to Runway</span>
-      <span class="dl-clock">Current Time in Tokyo, Japan: <span class="js-clock">--:--</span> (JST)</span>
-    </div>
-    <div class="data-grid">
-      <div class="data-cell fade">
-        <div class="d-script script">Data 1</div>
-        <div class="d-lab">New Customers — 新規購入数</div>
-        <div class="num serif"><span class="count" data-to="80">0</span><i>% UP</i></div>
-        <div class="d-cat">Fashion E-Commerce</div>
-        <p>Webサイトのリニューアルと、ターゲットを絞ったキャンペーン運用で新規購入数を改善。<span class="en">New customers up 80% through a store renewal and tightly targeted campaign management.</span></p>
+<!-- CH 6 · AFTER (data / contact / footer — internal sub-scroller) -->
+<section class="chapter" id="after" data-theme="light">
+  <div class="after-in" id="afterIn">
+    <div id="data">
+      <div class="data-frame">
+        <div class="data-letter">
+          <span class="script">Velmara</span>
+          <span class="dl-lines">VELMARA — Fashion Atelier / Thread to Runway</span>
+          <span class="dl-clock">Current Time in Tokyo, Japan: <span class="js-clock">--:--</span> (JST)<br><span class="js-hour">The Hour of —</span></span>
+        </div>
+        <div class="data-grid">
+          <div class="data-cell fade">
+            <div class="d-script script">Data 1</div>
+            <div class="d-lab">New Customers</div>
+            <div class="num serif"><span class="count" data-to="80">0</span><i>% UP</i></div>
+            <div class="d-cat">Fashion E-Commerce</div>
+            <p>A store renewal and tightly targeted campaign direction improved the number of new customers season over season.<span class="en">New customers up 80% through a website renewal and campaign management aimed at the wearers most likely to stay.</span></p>
+          </div>
+          <div class="data-cell fade">
+            <div class="d-script script">Data 2</div>
+            <div class="d-lab">Sell-Through</div>
+            <div class="num serif"><span class="count" data-to="271">0</span><i>% UP</i></div>
+            <div class="d-cat">Capsule Label</div>
+            <p>Drop-page improvements and focused advertising turned browsers into a waiting list before the rail was even full.<span class="en">Sell-through inquiries up 271% through landing-page improvements and advertising aimed with unusual care.</span></p>
+          </div>
+        </div>
       </div>
-      <div class="data-cell fade">
-        <div class="d-script script">Data 2</div>
-        <div class="d-lab">Sell-Through — 完売率</div>
-        <div class="num serif"><span class="count" data-to="271">0</span><i>% UP</i></div>
-        <div class="d-cat">Capsule Label</div>
-        <p>ドロップページの改善と、ターゲットを絞った広告運用で完売への問い合わせ数を改善。<span class="en">Sell-through inquiries up 271% through drop-page improvements and focused campaign direction.</span></p>
-      </div>
     </div>
-  </div>
-</section>
 
-<!-- 10. CONTACT FINALE -->
-<section id="contact" data-theme="light">
-  <div class="burn-oval" aria-hidden="true"></div>
-  <div class="c-script script">Contact</div>
-  <div class="c-lines">
-    <p class="grey fade">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
-    <p class="black fade">Only The Will To Be Seen<br>Stays The Same.</p>
-    <p class="bigger fade">Now It Is Your Turn<br>To Summon Us.</p>
+    <div id="contact">
+      <div class="burn-oval" aria-hidden="true"><canvas id="contactBurn"></canvas></div>
+      <div class="c-script script">Contact</div>
+      <div class="c-lines">
+        <p class="grey fade">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
+        <p class="black fade">Only The Will To Be Seen<br>Stays The Same.</p>
+        <p class="bigger fade">Now It Is Your Turn<br>To Summon Us.</p>
+      </div>
+      <p class="c-bar fade">The tools change — the will to be seen does not.</p>
+      <p class="c-en serif fade">Silk, type, code, AI. Whatever the tool of the age, the wish to be truly seen is the one material that never goes out of season.</p>
+      <div class="c-rule"></div>
+      <a id="contactBtn" href="mailto:atelier@velmara.example">CONTACT US</a>
+    </div>
+
+    <footer>
+      <div class="f-top">
+        <span class="script f-logo">Velmara</span>
+        <button class="f-menu" id="footMenuBtn" type="button">MENU</button>
+      </div>
+      <div class="f-cross"><span class="hline"></span><span class="cdot"></span></div>
+      <div class="f-grid">
+        <div class="f-company">
+          <b>VELMARA</b>
+          <p>Fashion Atelier — Thread to Runway<br>Editorial / Design / Creative Direction<br>atelier@velmara.example<br>© VELMARA. All rights reserved.</p>
+        </div>
+        <nav class="f-nav">
+          <a href="#" data-goto="0">Top</a><a href="#" data-goto="1">About</a>
+          <a href="#" data-goto="2">Works</a><a href="#" data-goto="3">Approach</a>
+          <a href="#" data-goto="5">Flow</a><a href="#" data-goto="6">Contact</a>
+        </nav>
+        <div class="f-clock">Current Time in Tokyo, Japan<br><b class="js-clock">--:--</b> (JST)<br><span class="js-hour">The Hour of —</span></div>
+      </div>
+      <div class="f-marquee"><div class="mq-track"><span>THE WILL TO BE SEEN IS PASSED DOWN ACROSS SEASONS ·&nbsp;</span><span>THE WILL TO BE SEEN IS PASSED DOWN ACROSS SEASONS ·&nbsp;</span></div></div>
+      <div class="f-small">From a single thread to the runway — across every age, only the will to be seen stays the same.</div>
+    </footer>
   </div>
-  <p class="c-bar fade">変わらないのは、見られたいという意志だけ。</p>
-  <p class="c-jp serif fade">道具は変わる。糸、活字、コード、AI。今度はあなたが、私たちを呼び出す番です。</p>
-  <div class="c-rule"></div>
-  <a id="contactBtn" href="mailto:atelier@velmara.example">CONTACT US</a>
 </section>
 </main>
 
-<!-- 11. FOOTER -->
-<footer data-theme="dark">
-  <div class="f-top">
-    <span class="script f-logo">Velmara</span>
-    <button class="f-menu" id="footMenuBtn" type="button">MENU</button>
-  </div>
-  <div class="f-cross"><span class="hline"></span><span class="cdot"></span></div>
-  <div class="f-grid">
-    <div class="f-company">
-      <b>VELMARA</b>
-      <p>Fashion Atelier — Thread to Runway<br>Editorial / Design / Creative Direction<br>atelier@velmara.example<br>© VELMARA. All rights reserved.</p>
-    </div>
-    <nav class="f-nav">
-      <a href="#hero">Top</a><a href="#about">About</a>
-      <a href="#works">Works</a><a href="#approach">Approach</a>
-      <a href="#flow">Flow</a><a href="#contact">Contact</a>
-    </nav>
-    <div class="f-clock">Current Time in Tokyo, Japan<br><b class="js-clock">--:--</b> (JST)<br><span class="js-hour">The Hour of —</span></div>
-  </div>
-  <div class="f-marquee"><div class="mq-track"><span>VELMARA — THREAD TO RUNWAY — VELMARA — THREAD TO RUNWAY —&nbsp;</span><span>VELMARA — THREAD TO RUNWAY — VELMARA — THREAD TO RUNWAY —&nbsp;</span></div></div>
-  <div class="f-small">糸からランウェイへ。時代を経ても、変わらないのは見られたいという意志だけ。</div>
-</footer>
-
-<script src="assets/js/main.js?v=2"></script>
+<script src="assets/js/main.js?v=3"></script>
 </body>
 </html>
