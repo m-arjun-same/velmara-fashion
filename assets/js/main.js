@@ -306,12 +306,13 @@ function omoiRender(){
 }
 
 /* ================= FLOW (intro + steps px scalar, lerp .12, Three.js wireframes) ================= */
-var fl={phase:0,tgt:0,cur:0,total:function(){return vh()*3;},ready:false,curStep:0,xf:null,snap:true};
+var fl={phase:0,tgt:0,cur:0,total:function(){return vh()*3;},ready:false,curStep:0,xf:null,snap:true,gather:0};
 var flSlides=document.querySelectorAll(".fl-slide"),flBar=$("flBar"),flCur=$("flCur"),flWarp=$("flWarp");
 function flShowPhase(){
   $("flIntro").classList.toggle("on",fl.phase===0);
   $("flStepsPh").classList.toggle("on",fl.phase===1);
   if(fl.phase===1)fl.snap=true; /* entering the steps: settle instantly on the current step, no crossfade */
+  if(fl.phase===0)fl.gather=0; /* particles disperse; they re-gather into the funnel when the steps open */
 }
 flShowPhase();
 function flWheel(dy){
@@ -413,14 +414,16 @@ function initGL(){
     g.userData.rings=tunnelRings;
     scene.add(g);groups.push(g);
     /* HURRICANE — GPU point vortex (study counts: 15,000 desktop / 6,000 mobile).
-       Each particle orbits the cone axis while flowing downward: angle grows with
-       time AND with depth (helical twist), radius shrinks along the cone, and the
-       axis itself sweeps from top-right to bottom-centre — a rotating hurricane. */
+       The PARTICLES are the effect: they gather from a scattered cloud into a
+       tornado funnel and keep swirling inside it — shell-concentrated points on a
+       funnel profile (wide top, narrow waist, slight base flare), angle growing
+       with time AND depth (helical twist), spin faster where the funnel tightens,
+       axial flow downward, axis sweeping from top-right to bottom-centre. */
     var N=window.innerWidth<820?6000:15000;
     var pos=new Float32Array(N*3),aH=new Float32Array(N),aAng=new Float32Array(N),aRad=new Float32Array(N),aSpd=new Float32Array(N),aSize=new Float32Array(N);
     for(i=0;i<N;i++){
       aH[i]=Math.random();aAng[i]=Math.random()*6.2832;
-      aRad[i]=0.35+0.65*Math.sqrt(Math.random());
+      aRad[i]=Math.pow(Math.random(),0.35); /* biased to the funnel shell, not the volume */
       aSpd[i]=0.6+Math.random()*0.9;aSize[i]=0.7+Math.random()*0.9;
     }
     var pg=new THREE.BufferGeometry();
@@ -432,19 +435,23 @@ function initGL(){
     pg.setAttribute("aSize",new THREE.BufferAttribute(aSize,1));
     var pm=new THREE.ShaderMaterial({
       transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-      uniforms:{uT:{value:0},uPR:{value:Math.min(devicePixelRatio,2)}},
+      uniforms:{uT:{value:0},uPR:{value:Math.min(devicePixelRatio,2)},uG:{value:0}},
       vertexShader:[
         "attribute float aH;attribute float aAng;attribute float aRad;attribute float aSpd;attribute float aSize;",
-        "uniform float uT;uniform float uPR;varying float vA;",
+        "uniform float uT;uniform float uPR;uniform float uG;varying float vA;",
         "void main(){",
         " float h=fract(aH+uT*0.045*aSpd);",
         " float ang=aAng+uT*(0.7+0.8*aSpd)*(0.75+0.85*h)+h*5.3;",
-        " float rad=mix(3.3,0.5,h)*aRad;",
+        " float fr=0.5+2.9*pow(1.0-h,2.0);",
+        " fr+=0.55*pow(clamp((h-0.86)/0.14,0.0,1.0),2.0);",
+        " float rad=fr*(0.7+0.3*aRad);",
         " float axisX=mix(1.9,-0.3,h);",
-        " vec3 p=vec3(axisX+cos(ang)*rad,mix(4.7,-4.7,h),sin(ang)*rad*0.85-0.4);",
+        " vec3 funnel=vec3(axisX+cos(ang)*rad,mix(4.7,-4.7,h),sin(ang)*rad*0.85-0.4);",
+        " vec3 scat=vec3((aRad-0.5)*11.0+sin(uT*0.3+aAng)*0.25,(fract(aH*7.31)-0.5)*9.0,-2.0-aRad*2.0);",
+        " vec3 p=mix(scat,funnel,uG);",
         " vec4 mv=modelViewMatrix*vec4(p,1.0);",
         " gl_Position=projectionMatrix*mv;",
-        " vA=smoothstep(0.0,0.13,h)*smoothstep(1.0,0.87,h)*(0.5+0.5*aRad);",
+        " vA=smoothstep(0.0,0.13,h)*smoothstep(1.0,0.87,h)*(0.5+0.5*aRad)*(0.35+0.65*uG);",
         " gl_PointSize=aSize*uPR*(22.0/max(1.0,-mv.z));",
         "}"
       ].join("\n"),
@@ -512,7 +519,11 @@ function flRender(now){
         g.userData.rings.forEach(function(r,j){r.position.z=-7+((j*1.05+travel)%(8*1.05));});
       }
     });
-    if(fl.vortex)fl.vortex.uniforms.uT.value=now/1000;
+    if(fl.vortex){
+      fl.vortex.uniforms.uT.value=now/1000;
+      fl.gather+=(1-fl.gather)*0.03; /* ease the cloud into the funnel over ~1.5s */
+      fl.vortex.uniforms.uG.value=fl.gather;
+    }
     fl.renderer.render(fl.scene,fl.cam);
   }
 }
