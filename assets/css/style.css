@@ -210,12 +210,13 @@ header.site.on-dark #menuBtn{background:var(--paper);color:#000}
 #flow .scroll-hint{right:4vw;bottom:4vh}
 .fl-steps{background:#060606}
 #flGl{position:absolute;inset:0;width:100%;height:100%}
-.fl-slide{position:absolute;top:0;bottom:0;width:min(40vw,560px);display:flex;flex-direction:column;justify-content:center;z-index:3;opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
+.fl-slide{position:absolute;top:0;bottom:0;width:min(37vw,520px);max-width:calc(100vw - 13vw);display:flex;flex-direction:column;justify-content:center;z-index:3;opacity:0;transform:translateY(26px);transition:opacity .45s ease,transform .45s ease;pointer-events:none}
 .fl-slide.act{opacity:1;transform:none;pointer-events:auto}
-.fl-slide:not(.alt){left:7vw}
-.fl-slide.alt{right:7vw;text-align:right;align-items:flex-end}
+.fl-slide:not(.alt){left:6.5vw}
+.fl-slide.alt{right:6.5vw;text-align:right;align-items:flex-end}
+.fl-slide h3,.fl-slide p,.fl-no,.fl-caps{text-shadow:0 2px 16px rgba(0,0,0,.65),0 0 2px rgba(0,0,0,.85)}
 .fl-no{font-family:var(--lat);font-size:15px;letter-spacing:.3em;color:#a9a59d;margin-bottom:20px}
-.fl-slide h3{font-size:clamp(26px,3vw,44px);font-weight:600;line-height:1.5}
+.fl-slide h3{font-size:clamp(24px,2.7vw,40px);font-weight:600;line-height:1.5}
 .fl-caps{font-size:11px;letter-spacing:.4em;color:var(--red);margin:16px 0 20px}
 .fl-slide p{font-family:var(--serif);font-size:13.5px;line-height:2.05;color:#cfcbc2;max-width:460px}
 .fl-slide p .en{font-size:15.5px}
@@ -331,9 +332,10 @@ footer{background:#080808;color:var(--paper);padding:6vh 5vw 0;overflow:hidden;p
   .oline span{font-size:12.5px}
   .phoenix{width:70vw;opacity:.35}
   .flow-title{font-size:24vw}
-  .fl-slide{width:86vw}
+  .fl-slide{width:86vw;justify-content:flex-end;padding-bottom:11vh}
   .fl-slide:not(.alt){left:7vw}
   .fl-slide.alt{right:7vw}
+  .fl-slide h3{font-size:23px}
   .data-grid{grid-template-columns:1fr}
   #contactBtn{font-size:13.5vw}
   .f-grid{grid-template-columns:1fr;gap:3.4vh}
