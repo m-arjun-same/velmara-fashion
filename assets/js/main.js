@@ -2,7 +2,7 @@
    no native scroll; ONE wheel/touch/keyboard dispatcher + chapter state machine;
    per-chapter 0..1 / px scalars with chapter lerp weights (.085 works, .12 sub, .05 hero fluid);
    WebGL fbm domain-warp crossfade between chapters; reusable noise burn
-   (loader exit, philosophy entry, contact oval); works text gate + breathing locks;
+   (loader exit, philosophy entry); works text gate + breathing locks;
    12fps film grain over works. Every system is original code written for Velmara. */
 (function(){
 "use strict";
@@ -136,7 +136,7 @@ function setHeader(){
   header.classList.toggle("show-letter",!dark);
   grainEl.classList.toggle("on",cur===2);
 }
-var omoiBurnAnim=null,contactBurnAnim=null;
+var omoiBurnAnim=null;
 function onEnter(n,from){
   if(n===4&&from===3){ /* philosophy: burn entry */
     var cv=$("omoiBurn");cv.style.display="block";
@@ -146,7 +146,6 @@ function onEnter(n,from){
   if(n===3&&from===4){ap.phase=1;apShowPhase();ap.tgt=ap.total();ap.cur=ap.tgt;}
   if(n===2&&from===3){works.tgt=1;}
   if(n===5&&from===6){fl.phase=1;flShowPhase();fl.tgt=fl.total();fl.cur=fl.tgt;}
-  if(n===5){sizeGL();}
   setHeader();
 }
 function goChapter(n){
@@ -305,19 +304,20 @@ function omoiRender(){
   oLines.forEach(function(l,i){l.classList.toggle("in",prog*4.4>i+0.25);});
 }
 
-/* ================= FLOW (intro + steps px scalar, lerp .12, Three.js wireframes) ================= */
-var fl={phase:0,tgt:0,cur:0,total:function(){return vh()*3;},ready:false,curStep:0,xf:null,snap:true,gather:0};
-var flSlides=document.querySelectorAll(".fl-slide"),flBar=$("flBar"),flCur=$("flCur"),flWarp=$("flWarp");
+/* ================= FLOW — THE SEAM (intro + pattern-piece steps, px scalar, lerp .12) =================
+   Own design: no WebGL in this chapter. The four steps are pattern pieces pinned
+   onto one stitch line; exactly one piece is active at a time, crossfading via CSS. */
+var fl={phase:0,tgt:0,cur:0,total:function(){return vh()*3;},curStep:0,snap:true};
+var flSlides=document.querySelectorAll(".fl-slide"),flBar=$("flBar"),flCur=$("flCur");
 function flShowPhase(){
   $("flIntro").classList.toggle("on",fl.phase===0);
   $("flStepsPh").classList.toggle("on",fl.phase===1);
-  if(fl.phase===1)fl.snap=true; /* entering the steps: settle instantly on the current step, no crossfade */
-  if(fl.phase===0)fl.gather=0; /* particles disperse; they re-gather into the funnel when the steps open */
+  if(fl.phase===1)fl.snap=true; /* entering the steps: settle instantly on the current step */
 }
 flShowPhase();
 function flWheel(dy){
   if(dy>0){
-    if(fl.phase===0){fl.phase=1;flShowPhase();sizeGL();return;}
+    if(fl.phase===0){fl.phase=1;flShowPhase();return;}
     if(fl.tgt>=fl.total()){goChapter(6);return;}
     fl.tgt=clamp(fl.tgt+dy,0,fl.total());
   }else{
@@ -326,206 +326,17 @@ function flWheel(dy){
     goChapter(4);
   }
 }
-/* Three.js scene — own clean neon wireframes (exactly ONE per step) + hurricane particle vortex.
-   Glow method: every line is drawn 3x — bright core #ff2a1e + two scaled halo shells,
-   all additive — over a radial-gradient glow sprite. Layered lines, not a CSS shadow. */
-var FL_XFADE=650; /* ms — the ONLY window in which two step objects may both be visible */
-function flGlowTexture(){
-  var c=document.createElement("canvas");c.width=c.height=128;
-  var x=c.getContext("2d"),grd=x.createRadialGradient(64,64,0,64,64,64);
-  grd.addColorStop(0,"rgba(255,64,40,.8)");grd.addColorStop(.35,"rgba(215,20,26,.34)");grd.addColorStop(1,"rgba(215,20,26,0)");
-  x.fillStyle=grd;x.fillRect(0,0,128,128);
-  return new THREE.CanvasTexture(c);
+function flSetStep(i){
+  fl.curStep=i;
+  flSlides.forEach(function(sl,j){sl.classList.toggle("act",j===i);});
+  flCur.textContent="0"+(i+1);
 }
-function flCircleGeo(r,seg){
-  var pts=[],i,a;
-  for(i=0;i<seg;i++){a=i/seg*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*r,Math.sin(a)*r,0));}
-  return new THREE.BufferGeometry().setFromPoints(pts);
-}
-function flLinePair(geo,loop,mats){
-  var holder=new THREE.Group();
-  var defs=[
-    {s:1,   col:0xff2a1e,key:"core", f:1},
-    {s:1.02,col:0xff5030,key:"shell",f:0.32},
-    {s:1.05,col:0xd7141a,key:"shell",f:0.14}
-  ];
-  defs.forEach(function(d){
-    var m=new THREE.LineBasicMaterial({color:d.col,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
-    m.userData.f=d.f;
-    var o=loop?new THREE.LineLoop(geo,m):new THREE.LineSegments(geo,m);
-    o.scale.setScalar(d.s);
-    mats[d.key].push(m);holder.add(o);
-  });
-  return holder;
-}
-function flStepGroup(glowTex){
-  var g=new THREE.Group();
-  g.userData.mats={core:[],shell:[]};
-  var sm=new THREE.SpriteMaterial({map:glowTex,color:0xff2418,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false});
-  var spr=new THREE.Sprite(sm);spr.scale.set(9.5,9.5,1);g.add(spr);
-  g.userData.glow=sm;
-  return g;
-}
-function flSetGroupOp(g,o){
-  g.userData.mats.core.forEach(function(mm){mm.opacity=o*mm.userData.f;});
-  g.userData.mats.shell.forEach(function(mm){mm.opacity=o*mm.userData.f;});
-  g.userData.glow.opacity=o*0.5;
-  g.visible=o>0.004;
-}
-function initGL(){
-  if(!window.THREE)return;
-  try{
-    var cv=$("flGl");
-    var renderer=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
-    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    var scene=new THREE.Scene();
-    var cam=new THREE.PerspectiveCamera(46,1,0.1,100);cam.position.set(0,0,9);
-    var glowTex=flGlowTexture();
-    var groups=[],g,i,h;
-    /* STEP 1 — clean cube: outer + inner box edges, two ribbon bands */
-    g=flStepGroup(glowTex);
-    g.add(flLinePair(new THREE.EdgesGeometry(new THREE.BoxGeometry(2.6,2.6,2.6)),false,g.userData.mats));
-    g.add(flLinePair(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.35,1.35,1.35)),false,g.userData.mats));
-    g.add(flLinePair(new THREE.EdgesGeometry(new THREE.BoxGeometry(2.68,0.55,2.68)),false,g.userData.mats));
-    g.add(flLinePair(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.55,2.68,2.68)),false,g.userData.mats));
-    scene.add(g);groups.push(g);
-    /* STEP 2 — concentric circular arches: three flat rings + two tilted */
-    g=flStepGroup(glowTex);
-    [2.4,1.9,1.4].forEach(function(r){g.add(flLinePair(flCircleGeo(r,96),true,g.userData.mats));});
-    h=flLinePair(flCircleGeo(2.4,96),true,g.userData.mats);h.rotation.x=0.9;g.add(h);
-    h=flLinePair(flCircleGeo(1.9,96),true,g.userData.mats);h.rotation.y=0.9;g.add(h);
-    scene.add(g);groups.push(g);
-    /* STEP 3 — sphere of intersecting great circles (rings only, no mesh) */
-    g=flStepGroup(glowTex);
-    [[0,0,0],[0,Math.PI/3,0],[0,2*Math.PI/3,0],[Math.PI/2.4,Math.PI/5,0],[-Math.PI/2.4,Math.PI/5,0],[Math.PI/2,0,Math.PI/3]].forEach(function(rr){
-      var hh=flLinePair(flCircleGeo(2.05,96),true,g.userData.mats);hh.rotation.set(rr[0],rr[1],rr[2]);g.add(hh);
-    });
-    scene.add(g);groups.push(g);
-    /* STEP 4 — concentric ring tunnel + longitudinal rails (rings travel toward viewer) */
-    g=flStepGroup(glowTex);
-    var tunnelRings=[];
-    for(i=0;i<8;i++){h=flLinePair(flCircleGeo(2.15,96),true,g.userData.mats);h.position.z=1.4-i*1.05;g.add(h);tunnelRings.push(h);}
-    var railPts=[];
-    [[2.15,0],[-2.15,0],[0,2.15],[0,-2.15]].forEach(function(p){
-      railPts.push(new THREE.Vector3(p[0],p[1],1.4));
-      railPts.push(new THREE.Vector3(p[0],p[1],1.4-7*1.05));
-    });
-    g.add(flLinePair(new THREE.BufferGeometry().setFromPoints(railPts),false,g.userData.mats));
-    g.userData.rings=tunnelRings;
-    scene.add(g);groups.push(g);
-    /* HURRICANE — GPU point vortex (study counts: 15,000 desktop / 6,000 mobile).
-       The PARTICLES are the effect: they gather from a scattered cloud into a
-       tornado funnel and keep swirling inside it — shell-concentrated points on a
-       funnel profile (wide top, narrow waist, slight base flare), angle growing
-       with time AND depth (helical twist), spin faster where the funnel tightens,
-       axial flow downward, axis sweeping from top-right to bottom-centre. */
-    var N=window.innerWidth<820?6000:15000;
-    var pos=new Float32Array(N*3),aH=new Float32Array(N),aAng=new Float32Array(N),aRad=new Float32Array(N),aSpd=new Float32Array(N),aSize=new Float32Array(N);
-    for(i=0;i<N;i++){
-      aH[i]=Math.random();aAng[i]=Math.random()*6.2832;
-      aRad[i]=Math.pow(Math.random(),0.35); /* biased to the funnel shell, not the volume */
-      aSpd[i]=0.6+Math.random()*0.9;aSize[i]=0.7+Math.random()*0.9;
-    }
-    var pg=new THREE.BufferGeometry();
-    pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
-    pg.setAttribute("aH",new THREE.BufferAttribute(aH,1));
-    pg.setAttribute("aAng",new THREE.BufferAttribute(aAng,1));
-    pg.setAttribute("aRad",new THREE.BufferAttribute(aRad,1));
-    pg.setAttribute("aSpd",new THREE.BufferAttribute(aSpd,1));
-    pg.setAttribute("aSize",new THREE.BufferAttribute(aSize,1));
-    var pm=new THREE.ShaderMaterial({
-      transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
-      uniforms:{uT:{value:0},uPR:{value:Math.min(devicePixelRatio,2)},uG:{value:0}},
-      vertexShader:[
-        "attribute float aH;attribute float aAng;attribute float aRad;attribute float aSpd;attribute float aSize;",
-        "uniform float uT;uniform float uPR;uniform float uG;varying float vA;",
-        "void main(){",
-        " float h=fract(aH+uT*0.045*aSpd);",
-        " float ang=aAng+uT*(0.7+0.8*aSpd)*(0.75+0.85*h)+h*5.3;",
-        " float fr=0.5+2.9*pow(1.0-h,2.0);",
-        " fr+=0.55*pow(clamp((h-0.86)/0.14,0.0,1.0),2.0);",
-        " float rad=fr*(0.7+0.3*aRad);",
-        " float axisX=mix(1.9,-0.3,h);",
-        " vec3 funnel=vec3(axisX+cos(ang)*rad,mix(4.7,-4.7,h),sin(ang)*rad*0.85-0.4);",
-        " vec3 scat=vec3((aRad-0.5)*11.0+sin(uT*0.3+aAng)*0.25,(fract(aH*7.31)-0.5)*9.0,-2.0-aRad*2.0);",
-        " vec3 p=mix(scat,funnel,uG);",
-        " vec4 mv=modelViewMatrix*vec4(p,1.0);",
-        " gl_Position=projectionMatrix*mv;",
-        " vA=smoothstep(0.0,0.13,h)*smoothstep(1.0,0.87,h)*(0.5+0.5*aRad)*(0.35+0.65*uG);",
-        " gl_PointSize=aSize*uPR*(22.0/max(1.0,-mv.z));",
-        "}"
-      ].join("\n"),
-      fragmentShader:[
-        "varying float vA;",
-        "void main(){vec2 d=gl_PointCoord-vec2(0.5);float a=smoothstep(0.5,0.06,length(d));gl_FragColor=vec4(0.96,0.95,0.93,a*vA*0.8);}"
-      ].join("\n")
-    });
-    var vortex=new THREE.Points(pg,pm);vortex.frustumCulled=false;
-    scene.add(vortex);
-    groups.forEach(function(gg){flSetGroupOp(gg,0);});
-    fl.ready=true;fl.renderer=renderer;fl.scene=scene;fl.cam=cam;fl.groups=groups;fl.vortex=pm;fl.cv=cv;
-  }catch(e){fl.ready=false;}
-}
-initGL();
-function sizeGL(){if(!fl.ready)return;var w=fl.cv.offsetWidth,h=fl.cv.offsetHeight;if(!w||!h)return;fl.renderer.setSize(w,h,false);fl.cam.aspect=w/h;fl.cam.updateProjectionMatrix();}
-sizeGL();
-function flRender(now){
-  now=now||performance.now();
+function flRender(){
   var s={tgt:fl.tgt,cur:fl.cur};pxStep(s);fl.cur=s.cur;
-  var prog=fl.total()?fl.cur/fl.total():0,ff=clamp(prog*3,0,3),desired=Math.round(ff);
-  flBar.style.width=(prog*100)+"%";
-  var wprog=clamp((prog-0.93)/0.07,0,1);
-  flWarp.style.opacity=String(wprog);
-  flWarp.querySelectorAll("i").forEach(function(el,i){el.style.transform="scale("+(1+wprog*(i+1)*0.55)+") rotate("+(wprog*6)+"deg)";});
-  if(fl.snap){
-    fl.xf=null;fl.curStep=desired;
-    flSlides.forEach(function(sl,i){sl.classList.toggle("act",i===fl.curStep);});
-    flCur.textContent="0"+(fl.curStep+1);
-    if(fl.ready)fl.groups.forEach(function(g,i){flSetGroupOp(g,i===fl.curStep?1:0);});
-    fl.snap=false;
-  }
-  if(fl.ready&&fl.phase===1){
-    sizeGL();
-    /* step switching = one discrete 650ms crossfade; outside it exactly ONE object is visible */
-    if(!fl.xf&&desired!==fl.curStep){
-      fl.xf={from:fl.curStep,to:desired,t0:now,swapped:false};
-      flSlides[fl.curStep].classList.remove("act");
-    }
-    if(fl.xf){
-      var k=clamp((now-fl.xf.t0)/FL_XFADE,0,1),e=easeIO(k);
-      flSetGroupOp(fl.groups[fl.xf.from],1-e);
-      flSetGroupOp(fl.groups[fl.xf.to],e);
-      if(k>=0.5&&!fl.xf.swapped){
-        fl.xf.swapped=true;fl.curStep=fl.xf.to;
-        flSlides[fl.curStep].classList.add("act");
-        flCur.textContent="0"+(fl.curStep+1);
-      }
-      if(k>=1){flSetGroupOp(fl.groups[fl.xf.from],0);flSetGroupOp(fl.groups[fl.xf.to],1);fl.xf=null;}
-    }
-    /* place + spin visible object(s): fixed on the side OPPOSITE their text column, never travelling */
-    var aspect=fl.cam.aspect||1.6;
-    var portrait=aspect<0.9;
-    var offX=portrait?0:(aspect<1.3?1.95:2.55);
-    var baseScale=portrait?0.66:1;
-    fl.groups.forEach(function(g,i){
-      if(!g.visible)return;
-      if(portrait){g.position.set(0,1.85,-0.5);}
-      else{g.position.set((i%2===0?1:-1)*offX,0,0);}
-      g.scale.setScalar(baseScale);
-      g.rotation.y+=0.0038;
-      g.rotation.x=Math.sin(now*0.00035+i*1.7)*0.22;
-      if(g.userData.rings){
-        var travel=(now*0.0006)%(8*1.05);
-        g.userData.rings.forEach(function(r,j){r.position.z=-7+((j*1.05+travel)%(8*1.05));});
-      }
-    });
-    if(fl.vortex){
-      fl.vortex.uniforms.uT.value=now/1000;
-      fl.gather+=(1-fl.gather)*0.03; /* ease the cloud into the funnel over ~1.5s */
-      fl.vortex.uniforms.uG.value=fl.gather;
-    }
-    fl.renderer.render(fl.scene,fl.cam);
-  }
+  var prog=fl.total()?fl.cur/fl.total():0,desired=Math.round(clamp(prog*3,0,3));
+  flBar.style.width=(prog*100)+"%"; /* stitch progress: red stitches fill the line */
+  if(fl.snap){flSetStep(desired);fl.snap=false;return;}
+  if(desired!==fl.curStep)flSetStep(desired);
 }
 
 /* ================= chapter wheel handlers ================= */
@@ -623,19 +434,12 @@ var cio=new IntersectionObserver(function(es){es.forEach(function(e){
   (function step(ts){if(!t0)t0=ts;var k=clamp((ts-t0)/1600,0,1);e.target.textContent=Math.floor(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);})(performance.now());
 });},{threshold:0.4});
 document.querySelectorAll(".count").forEach(function(e){cio.observe(e);});
-var bio=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(e.isIntersecting&&!contactBurnAnim){contactBurnAnim={t0:performance.now(),dur:1700};bio.disconnect();}
-});},{threshold:0.4});
-bio.observe(document.querySelector(".burn-oval"));
 
 /* ================= burns: loader / omoi / contact ================= */
 var ldBurnCv=$("ldBurn");ldBurnCv.width=192;ldBurnCv.height=108;
 var ldBurn=makeBurn(ldBurnCv,[0,0,0],false);
 var omBurnCv=$("omoiBurn");omBurnCv.width=192;omBurnCv.height=108;
 var omBurn=makeBurn(omBurnCv,[244,242,238],false);
-var ctBurnCv=$("contactBurn");ctBurnCv.width=120;ctBurnCv.height=76;
-var ctBurn=makeBurn(ctBurnCv,[255,255,255],true);
-ctBurn.draw(0);
 var loaderBurnAnim=null;
 
 /* ================= film grain (12fps, works scenes) ================= */
@@ -722,11 +526,6 @@ function raf(now){
     omBurn.draw(easeIO(op));
     if(op>=1){omoiBurnAnim.cv.style.display="none";omoiBurnAnim=null;}
   }
-  if(contactBurnAnim){
-    var cp=clamp((now-contactBurnAnim.t0)/contactBurnAnim.dur,0,1);
-    ctBurn.draw(easeIO(cp));
-    if(cp>=1)contactBurnAnim=null;
-  }
   /* film grain 12fps over works */
   if(cur===2&&now-lastGrain>=80){lastGrain=now;drawGrain(now);}
   requestAnimationFrame(raf);
@@ -743,7 +542,7 @@ handlers[1]=function(dy,now){
 addEventListener("resize",function(){
   if(heroPetals)heroPetals.resize();
   if(apPetals)apPetals.resize();
-  sizeGL();sizeWarp();
+  sizeWarp();
   caseEls.forEach(function(c,i){
     var inner=c.querySelector(".case-txt-in"),box=c.querySelector(".case-txt");
     txtMax[i]=Math.max(0,inner.scrollHeight-box.clientHeight);

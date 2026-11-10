@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&family=Shippori+Mincho+B1:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=4">
+<link rel="stylesheet" href="assets/css/style.css?v=5">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 </head>
 <body>
@@ -232,55 +232,61 @@
   </div>
 </section>
 
-<!-- CH 5 · FLOW (intro + steps) -->
+<!-- CH 5 · FLOW — THE SEAM (own design) -->
 <section class="chapter" id="flow" data-theme="dark">
   <div class="fl-phase fl-intro" id="flIntro">
-    <svg class="phoenix" viewBox="0 0 300 300" fill="none" stroke="#f2f0ec" stroke-width="1.4" aria-hidden="true">
-      <path d="M150 270 C120 210 60 190 30 120 C70 150 95 150 120 140 C90 110 80 70 100 30 C115 70 135 90 155 105 C150 70 165 40 195 25 C185 60 190 85 205 105 C235 90 255 95 275 120 C240 130 225 150 215 175 C240 175 260 190 272 215 C235 215 205 235 185 262 C172 278 158 282 150 270 Z"/>
-      <circle cx="168" cy="96" r="3.2" fill="#d7141a" stroke="none"/>
-      <path d="M120 140 C150 165 185 168 215 175"/>
-      <path d="M100 30 C130 90 150 140 155 200"/>
-    </svg>
-    <div class="cross c1"></div><div class="cross c2"></div>
-    <h2 class="flow-title"><span class="ft-the script">The</span><span>ALIGN</span><span>FLOW</span></h2>
-    <div class="flow-spine"><i></i><span class="dot"></span></div>
+    <div class="vel-seam" aria-hidden="true"><span class="seam-needle"></span><span class="seam-notch top">NOTCH 01</span><span class="seam-notch bot">CUT ON THE SEAM</span></div>
+    <div class="fl-intro-side" aria-hidden="true">PATTERN No. 5 — THE MAKING</div>
+    <div class="fl-intro-copy">
+      <div class="fl-kicker">VELMARA — THE MAKING, STITCHED IN ORDER</div>
+      <h2 class="flow-title"><span class="ft-the script">The</span><span>ALIGN</span><span>FLOW</span></h2>
+      <p class="fl-intro-note">Four pattern pieces. One seam.<br>Follow the stitch.</p>
+    </div>
     <div class="scroll-hint light">SCROLL</div>
   </div>
   <div class="fl-phase fl-steps" id="flStepsPh">
-    <canvas id="flGl"></canvas>
-    <div class="fl-warp" id="flWarp" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="vel-seam" aria-hidden="true"><span class="seam-needle"></span><span class="seam-notch top">THE SEAM</span><span class="seam-notch bot">PIECES 01–04</span></div>
     <article class="fl-slide s0 act">
-      <div class="fl-no">01 / 04</div>
+      <span class="pp-edge" aria-hidden="true"></span><span class="pp-pin" aria-hidden="true"></span>
+      <div class="pp-head"><span class="fl-no">01 / 04</span><span class="pp-label">PATTERN PIECE 01 — CUT ONE</span></div>
       <h3 class="serif">Find the Essence of the House.</h3>
       <div class="fl-caps">FIND THE ESSENCE OF THE BRAND.</div>
       <p>The intent of the house, the value to deliver, the wearer's point of view — everything begins by aligning them into one flow, and removing everything that does not belong to it.<span class="en">Essence is not found by adding. It is what remains when the unnecessary has been respectfully shown the door.</span></p>
+      <div class="pp-notches" aria-hidden="true"><i></i><i></i><i></i></div>
     </article>
     <article class="fl-slide s1 alt">
-      <div class="fl-no">02 / 04</div>
+      <span class="pp-edge" aria-hidden="true"></span><span class="pp-pin" aria-hidden="true"></span>
+      <div class="pp-head"><span class="fl-no">02 / 04</span><span class="pp-label">PATTERN PIECE 02 — CUT ONE</span></div>
       <h3 class="serif">Design the Experience.</h3>
       <div class="fl-caps">DESIGN THE EXPERIENCE.</div>
       <p>Aligned intent becomes a line. We read the body's movement and the fall of cloth, and wait for the silhouette to rise — then we build every touchpoint around that single rising line.<span class="en">A garment is experienced in motion, in mirrors, in the memory of a room. We design for all three.</span></p>
+      <div class="pp-notches" aria-hidden="true"><i></i><i></i><i></i></div>
     </article>
     <article class="fl-slide s2">
-      <div class="fl-no">03 / 04</div>
+      <span class="pp-edge" aria-hidden="true"></span><span class="pp-pin" aria-hidden="true"></span>
+      <div class="pp-head"><span class="fl-no">03 / 04</span><span class="pp-label">PATTERN PIECE 03 — CUT ONE</span></div>
       <h3 class="serif">Build the World Around It.</h3>
       <div class="fl-caps">ARCHITECT THE WORLD.</div>
       <p>Every seam holds a maker's decision. Finished by the certainty of hands, not the speed of machines — and surrounded by a world of image, word and space that tells the same story.<span class="en">The world is the second garment: the one the collection wears in public.</span></p>
+      <div class="pp-notches" aria-hidden="true"><i></i><i></i><i></i></div>
     </article>
     <article class="fl-slide s3 alt">
-      <div class="fl-no">04 / 04</div>
+      <span class="pp-edge" aria-hidden="true"></span><span class="pp-pin" aria-hidden="true"></span>
+      <div class="pp-head"><span class="fl-no">04 / 04</span><span class="pp-label">PATTERN PIECE 04 — CUT ONE</span></div>
       <h3 class="serif">Make It Keep Running.</h3>
       <div class="fl-caps">BUILD WHAT KEEPS RUNNING.</div>
       <p>The finished garment travels from runway to everyday life, and the system behind it keeps travelling too — repair, archive, and a new season already listening for its wearer.<span class="en">A house is not a collection. It is a mechanism for making the next one better.</span></p>
+      <div class="pp-notches" aria-hidden="true"><i></i><i></i><i></i></div>
     </article>
-    <div class="fl-gauge"><span id="flCur">01</span><span class="gbar"><i id="flBar"></i></span><span>04</span></div>
+    <div class="fl-gauge"><span id="flCur">01</span><span class="fl-stitches"><i id="flBar"></i></span><span>04</span></div>
   </div>
 </section>
 
-<!-- CH 6 · AFTER (data / contact / footer — internal sub-scroller) -->
+<!-- CH 6 · AFTER — THE SEAM CONTINUES (data / contact / footer, internal sub-scroller) -->
 <section class="chapter" id="after" data-theme="light">
   <div class="after-in" id="afterIn">
     <div id="data">
+      <div class="tape-strip" aria-hidden="true"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>MEASURED, NOT GUESSED</span></div>
       <div class="data-frame">
         <div class="data-letter">
           <span class="script">Velmara</span>
@@ -307,17 +313,19 @@
     </div>
 
     <div id="contact">
-      <div class="burn-oval" aria-hidden="true"><canvas id="contactBurn"></canvas></div>
-      <div class="c-script script">Contact</div>
-      <div class="c-lines">
-        <p class="grey fade">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
-        <p class="black fade">Only The Will To Be Seen<br>Stays The Same.</p>
-        <p class="bigger fade">Now It Is Your Turn<br>To Summon Us.</p>
+      <div class="fit-card">
+        <div class="c-script script">Contact</div>
+        <div class="fit-label">BY APPOINTMENT — THE FITTING</div>
+        <div class="c-lines">
+          <p class="grey fade">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
+          <p class="black fade">Only The Will To Be Seen<br>Stays The Same.</p>
+          <p class="bigger fade">Now It Is Your Turn<br>To Summon Us.</p>
+        </div>
+        <p class="c-bar fade">The tools change — the will to be seen does not.</p>
+        <p class="c-en serif fade">Silk, type, code, AI. Whatever the tool of the age, the wish to be truly seen is the one material that never goes out of season.</p>
+        <div class="c-rule"></div>
+        <a id="contactBtn" href="mailto:atelier@velmara.example">CONTACT US</a>
       </div>
-      <p class="c-bar fade">The tools change — the will to be seen does not.</p>
-      <p class="c-en serif fade">Silk, type, code, AI. Whatever the tool of the age, the wish to be truly seen is the one material that never goes out of season.</p>
-      <div class="c-rule"></div>
-      <a id="contactBtn" href="mailto:atelier@velmara.example">CONTACT US</a>
     </div>
 
     <footer>
@@ -325,7 +333,7 @@
         <span class="script f-logo">Velmara</span>
         <button class="f-menu" id="footMenuBtn" type="button">MENU</button>
       </div>
-      <div class="f-cross"><span class="hline"></span><span class="cdot"></span></div>
+      <div class="f-seam-end" aria-hidden="true"><i></i><span>SEAM FINISHED — KNOT &amp; CUT</span></div>
       <div class="f-grid">
         <div class="f-company">
           <b>VELMARA</b>
@@ -338,13 +346,12 @@
         </nav>
         <div class="f-clock">Current Time in Tokyo, Japan<br><b class="js-clock">--:--</b> (JST)<br><span class="js-hour">The Hour of —</span></div>
       </div>
-      <div class="f-marquee"><div class="mq-track"><span>THE WILL TO BE SEEN IS PASSED DOWN ACROSS SEASONS ·&nbsp;</span><span>THE WILL TO BE SEEN IS PASSED DOWN ACROSS SEASONS ·&nbsp;</span></div></div>
       <div class="f-small">From a single thread to the runway — across every age, only the will to be seen stays the same.</div>
     </footer>
   </div>
 </section>
 </main>
 
-<script src="assets/js/main.js?v=4"></script>
+<script src="assets/js/main.js?v=5"></script>
 </body>
 </html>

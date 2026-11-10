@@ -191,55 +191,62 @@ header.site.on-dark #menuBtn{background:var(--paper);color:#000}
 .oline p{font-size:clamp(17px,1.65vw,25px);line-height:1.8;font-weight:600}
 .oline span{display:block;margin-top:8px;font-family:var(--lat);font-size:14.5px;line-height:1.6;color:rgba(255,235,225,.62)}
 
-/* ---------- FLOW ---------- */
-#flow{background:#060606;color:#fff}
+/* ---------- FLOW — THE SEAM (own design: one stitch line stitches the tail) ---------- */
+#flow{background:#070605;color:#fff}
 .fl-phase{position:absolute;inset:0;overflow:hidden;opacity:0;visibility:hidden;transition:opacity .6s ease}
 .fl-phase.on{opacity:1;visibility:visible}
-.fl-intro{display:flex;align-items:center;justify-content:center}
-.phoenix{position:absolute;right:4vw;top:50%;transform:translateY(-50%);width:34vw;max-width:470px;opacity:.9}
-.flow-title{position:relative;font-family:var(--disp);font-weight:400;font-size:15.5vw;line-height:.9;text-align:center;z-index:2}
+.vel-seam{position:absolute;top:0;bottom:0;left:50%;width:0;border-left:2px dashed rgba(242,240,236,.38);z-index:1;pointer-events:none}
+.vel-seam .seam-needle{position:absolute;top:12vh;left:-5px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px rgba(215,20,26,.2)}
+.seam-notch{position:absolute;left:14px;font-size:9.5px;letter-spacing:.32em;color:#a9a59d;white-space:nowrap;font-family:var(--sans)}
+.seam-notch.top{top:12.6vh}
+.seam-notch.bot{bottom:11vh}
+.fl-intro{display:block}
+.fl-intro-side{position:absolute;left:5vw;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font-size:10.5px;letter-spacing:.5em;color:#a9a59d;z-index:2}
+.fl-intro-copy{position:absolute;left:calc(50% + 4vw);top:50%;transform:translateY(-50%);z-index:2;max-width:44vw}
+.fl-kicker{font-size:10.5px;letter-spacing:.34em;color:var(--red);margin-bottom:3.2vh}
+.flow-title{position:relative;font-family:var(--disp);font-weight:400;font-size:9.2vw;line-height:.92;text-align:left;z-index:2}
 .flow-title span{display:block}
-.ft-the{font-size:.3em;color:#fff;transform:rotate(-4deg);margin-bottom:.1em}
-.cross{position:absolute;background:rgba(242,240,236,.28);z-index:1}
-.cross.c1{left:0;right:0;top:50%;height:1px}
-.cross.c2{top:0;bottom:0;left:50%;width:1px}
-.flow-spine{position:absolute;left:50%;bottom:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;z-index:2}
-.flow-spine i{display:block;width:1px;height:11vh;background:rgba(242,240,236,.5)}
-.flow-spine .dot{width:15px;height:15px;border:1px solid #f2f0ec;border-radius:50%;margin-bottom:7.5vh;position:relative}
-.flow-spine .dot::after{content:"";position:absolute;inset:5px;background:var(--red);border-radius:50%}
+.ft-the{font-size:.3em;color:#fff;transform:rotate(-4deg);margin-bottom:.12em;transform-origin:left center}
+.fl-intro-note{margin-top:3.4vh;font-family:var(--lat);font-style:italic;font-size:clamp(16px,1.5vw,22px);line-height:1.6;color:#cfcbc2}
 #flow .scroll-hint{right:4vw;bottom:4vh}
-.fl-steps{background:#060606}
-#flGl{position:absolute;inset:0;width:100%;height:100%}
-.fl-slide{position:absolute;top:0;bottom:0;width:min(37vw,520px);max-width:calc(100vw - 13vw);display:flex;flex-direction:column;justify-content:center;z-index:3;opacity:0;transform:translateY(26px);transition:opacity .45s ease,transform .45s ease;pointer-events:none}
-.fl-slide.act{opacity:1;transform:none;pointer-events:auto}
-.fl-slide:not(.alt){left:6.5vw}
-.fl-slide.alt{right:6.5vw;text-align:right;align-items:flex-end}
-.fl-slide h3,.fl-slide p,.fl-no,.fl-caps{text-shadow:0 2px 16px rgba(0,0,0,.65),0 0 2px rgba(0,0,0,.85)}
-.fl-no{font-family:var(--lat);font-size:15px;letter-spacing:.3em;color:#a9a59d;margin-bottom:20px}
-.fl-slide h3{font-size:clamp(24px,2.7vw,40px);font-weight:600;line-height:1.5}
-.fl-caps{font-size:11px;letter-spacing:.4em;color:var(--red);margin:16px 0 20px}
-.fl-slide p{font-family:var(--serif);font-size:13.5px;line-height:2.05;color:#cfcbc2;max-width:460px}
+.fl-steps{background:#070605}
+.fl-slide{position:absolute;top:50%;width:min(37vw,520px);max-width:calc(100vw - 13vw);background:var(--paper2);color:#141414;padding:4.4vh 2.4vw 3.6vh;z-index:3;opacity:0;visibility:hidden;transform:translateY(-50%) translateX(34px);transition:opacity .5s ease,transform .55s cubic-bezier(.22,.8,.3,1),visibility 0s .5s;pointer-events:none;box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.fl-slide.act{opacity:1;visibility:visible;transform:translateY(-50%) translateX(0);transition:opacity .5s ease,transform .55s cubic-bezier(.22,.8,.3,1);pointer-events:auto}
+.fl-slide:not(.alt){left:calc(50% + 3.4vw)}
+.fl-slide.alt{right:calc(50% + 3.4vw);transform:translateY(-50%) translateX(-34px)}
+.fl-slide.alt.act{transform:translateY(-50%) translateX(0)}
+.pp-edge{position:absolute;inset:10px;border:1.5px dashed rgba(20,20,20,.42);pointer-events:none}
+.pp-pin{position:absolute;top:50%;margin-top:-8px;width:15px;height:15px;border-radius:50%;background:var(--red);border:2px solid #070605;z-index:2}
+.fl-slide:not(.alt) .pp-pin{left:-9px}
+.fl-slide.alt .pp-pin{right:-9px}
+.pp-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.fl-no{font-family:var(--lat);font-size:15px;letter-spacing:.3em;color:#8a8578}
+.pp-label{font-size:9.5px;letter-spacing:.3em;color:var(--red)}
+.fl-slide h3{font-size:clamp(24px,2.7vw,40px);font-weight:600;line-height:1.45;color:#141414;margin-top:18px}
+.fl-caps{font-size:11px;letter-spacing:.4em;color:var(--red);margin:14px 0 16px}
+.fl-slide p{font-family:var(--serif);font-size:13.5px;line-height:2;color:#4a463d;max-width:460px}
 .fl-slide p .en{font-size:15.5px}
-.fl-gauge{position:absolute;left:50%;bottom:4.5vh;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:var(--lat);font-size:15px;letter-spacing:.2em;z-index:5}
-.fl-gauge .gbar{background:#3a3a3a}
-.fl-warp{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
-.fl-warp i{position:absolute;border:1.5px solid rgba(255,190,210,.85);width:12vw;height:12vw;display:block}
-.fl-warp i:nth-child(2){width:22vw;height:22vw;border-color:rgba(255,140,180,.6)}
-.fl-warp i:nth-child(3){width:34vw;height:34vw;border-color:rgba(215,20,26,.5)}
-.fl-warp i:nth-child(4){width:48vw;height:48vw;border-color:rgba(255,190,210,.3)}
-.fl-warp i:nth-child(5){width:64vw;height:64vw;border-color:rgba(215,20,26,.25)}
+.pp-notches{display:flex;gap:10px;margin-top:22px}
+.pp-notches i{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid #141414;opacity:.5}
+.fl-gauge{position:absolute;left:50%;bottom:4.5vh;transform:translateX(-50%);display:flex;align-items:center;gap:14px;font-family:var(--lat);font-size:15px;letter-spacing:.2em;z-index:5;color:#f2f0ec}
+.fl-stitches{position:relative;display:block;width:170px;height:12px;background:repeating-linear-gradient(90deg,rgba(242,240,236,.35) 0 12px,transparent 12px 22px);background-size:100% 2px;background-position:center;background-repeat:no-repeat}
+.fl-stitches i{position:absolute;left:0;top:5px;height:2px;width:0;display:block;background:repeating-linear-gradient(90deg,var(--red) 0 12px,transparent 12px 22px)}
 
-/* ---------- AFTER (internal sub-scroller) ---------- */
-#after{background:#fff}
-.after-in{will-change:transform}
-#data{background:#fff;padding:9vh 4vw 8vh}
-.data-frame{border:1px solid #d9d5cc;padding:5vh 4vw 7vh;position:relative}
+/* ---------- AFTER (internal sub-scroller) — the seam continues on paper ---------- */
+#after{background:var(--paper2)}
+.after-in{will-change:transform;position:relative}
+.after-in::before{content:"";position:absolute;top:0;bottom:0;left:26px;border-left:2px dashed rgba(215,20,26,.38);z-index:6;pointer-events:none}
+#data{background:var(--paper2);padding:15vh 4vw 7vh calc(4vw + 24px);position:relative}
+.tape-strip{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #141414;border-bottom:1px solid #141414;padding:7px 196px 16px 12px;margin-bottom:4.5vh;font-size:10px;letter-spacing:.24em;color:#555;background:repeating-linear-gradient(90deg,rgba(20,20,20,.55) 0 1px,transparent 1px 26px),repeating-linear-gradient(90deg,rgba(20,20,20,.95) 0 1px,transparent 1px 130px);background-size:100% 11px,100% 18px;background-position:bottom left,bottom left;background-repeat:repeat-x}
+.tape-strip span:last-child{color:var(--red)}
+.data-frame{border:1px solid #d9d5cc;padding:5vh 4vw 7vh;position:relative;background:#fff}
 .data-letter{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:1px solid #e3dfd5;padding-bottom:3vh;margin-bottom:6vh}
 .data-letter .script{font-size:36px}
 .dl-lines{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#555;line-height:2}
 .dl-clock{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#555;text-align:right}
 .data-grid{display:grid;grid-template-columns:1fr 1fr;gap:3vw}
-.data-cell{border:1px solid #d9d5cc;padding:4.5vh 3vw}
+.data-cell{border:1px solid #d9d5cc;padding:4.5vh 3vw;position:relative}
+.data-cell::before{content:"";position:absolute;inset:8px;border:1px dashed rgba(20,20,20,.22);pointer-events:none}
 .d-script{font-size:34px;color:#141414}
 .d-lab{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#8a8a8a;margin-top:10px}
 .data-cell .num{font-size:clamp(56px,7vw,110px);line-height:1.05;color:#141414;margin:1.6vh 0}
@@ -248,42 +255,38 @@ header.site.on-dark #menuBtn{background:var(--paper);color:#000}
 .data-cell p{font-family:var(--serif);font-size:13.5px;line-height:2;color:#4a463d}
 .data-cell p .en{font-size:15.5px}
 
-/* ---------- CONTACT ---------- */
-#contact{position:relative;background:#fff;text-align:center;padding:10vh 5vw 6vh;overflow:hidden}
-.burn-oval{position:relative;width:300px;height:190px;margin:0 auto}
-.burn-oval::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(closest-side,#ff5a2a 0%,var(--red) 55%,#5c0b0f 92%);box-shadow:0 0 60px rgba(215,20,26,.45)}
-#contactBurn{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
-.c-script{font-size:52px;margin-top:2.5vh;color:#141414}
+/* ---------- CONTACT — the fitting invitation ---------- */
+#contact{position:relative;background:var(--paper2);padding:9vh 5vw 8vh calc(5vw + 24px);overflow:hidden}
+.fit-card{position:relative;border:1px solid #141414;max-width:920px;margin:0 auto;padding:6vh 5vw 5vh;background:#fff;text-align:center}
+.fit-card::before{content:"";position:absolute;inset:10px;border:1.5px dashed rgba(215,20,26,.45);pointer-events:none}
+.c-script{font-size:52px;color:#141414;position:relative}
+.fit-label{font-size:10.5px;letter-spacing:.38em;color:var(--red);margin-top:1.6vh;position:relative}
+.c-lines{position:relative}
 .c-lines p{font-family:var(--serif);line-height:1.5}
 .c-lines .grey{font-size:clamp(30px,4.6vw,68px);color:#b9b4aa;margin-top:4vh}
 .c-lines .black{font-size:clamp(30px,4.6vw,68px);color:#141414;margin-top:3.4vh}
 .c-lines .bigger{font-size:clamp(38px,6vw,92px);color:#141414;margin-top:3.4vh;line-height:1.4}
-.c-bar{display:inline-block;background:#111;color:#fff;font-family:var(--serif);font-size:clamp(14px,1.5vw,20px);letter-spacing:.14em;padding:12px 34px;margin-top:5.5vh}
-.c-en{font-size:15px;line-height:2.1;color:#555;margin:3.4vh auto 0;max-width:640px}
-.c-rule{border-top:3px double #141414;max-width:760px;margin:6vh auto 4vh}
-#contactBtn{display:block;font-family:var(--disp);font-size:11.5vw;line-height:1;color:var(--red);letter-spacing:.01em;white-space:nowrap}
+.c-bar{display:inline-block;background:#111;color:#fff;font-family:var(--serif);font-size:clamp(14px,1.5vw,20px);letter-spacing:.14em;padding:12px 34px;margin-top:5.5vh;position:relative}
+.c-en{font-size:15px;line-height:2.1;color:#555;margin:3.4vh auto 0;max-width:640px;position:relative}
+.c-rule{border-top:3px double #141414;max-width:760px;margin:6vh auto 4vh;position:relative}
+#contactBtn{display:block;font-family:var(--disp);font-size:clamp(44px,8.6vw,118px);line-height:1;color:var(--red);letter-spacing:.01em;white-space:nowrap;position:relative}
 #contactBtn:hover{color:var(--red2)}
 
-/* ---------- FOOTER (inside after) ---------- */
-footer{background:#080808;color:var(--paper);padding:6vh 5vw 0;overflow:hidden;position:relative}
+/* ---------- FOOTER (inside after) — atelier colophon, seam knotted off ---------- */
+footer{background:#080808;color:var(--paper);padding:6vh 5vw 0 calc(5vw + 24px);overflow:hidden;position:relative}
 .f-top{display:flex;justify-content:space-between;align-items:center}
 .f-logo{font-size:38px}
 .f-menu{background:var(--paper);color:#000;border:0;font-size:11px;letter-spacing:.3em;padding:12px 26px;border-radius:99px;cursor:pointer}
-.f-cross{position:relative;height:12vh;margin-top:3vh}
-.f-cross .hline{position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(242,240,236,.25)}
-.f-cross .hline::after{content:"";position:absolute;top:-6vh;bottom:-6vh;left:50%;width:1px;background:rgba(242,240,236,.25)}
-.f-cross .cdot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:13px;height:13px;border:1px solid #f2f0ec;border-radius:50%;background:#080808}
-.f-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:4vw;padding-bottom:6vh}
+.f-seam-end{display:flex;align-items:center;gap:16px;margin-top:4.5vh;font-size:10px;letter-spacing:.32em;color:#a9a59d}
+.f-seam-end i{flex:0 0 110px;border-top:2px dashed rgba(242,240,236,.5)}
+.f-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:4vw;padding:5vh 0 6vh}
 .f-company b{font-family:var(--caps);letter-spacing:.4em;font-size:14px}
 .f-company p{margin-top:16px;font-size:12.5px;line-height:2.05;color:#a9a59d}
 .f-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;align-content:start;font-family:var(--lat);font-size:19px}
 .f-nav a:hover{color:var(--red)}
 .f-clock{font-size:11px;letter-spacing:.2em;line-height:2;text-transform:uppercase;color:#a9a59d}
 .f-clock b{color:var(--paper);font-size:15px}
-.f-marquee{border-top:1px solid rgba(242,240,236,.18);overflow:hidden;height:.92em;font-family:var(--serif);font-size:6.4vw;line-height:.95;color:#4c4a45;white-space:nowrap;text-shadow:3px 0 rgba(215,20,26,.45),-3px 0 rgba(0,220,255,.4)}
-.mq-track{display:inline-flex;animation:mq 26s linear infinite;will-change:transform}
-@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.f-small{text-align:center;font-family:var(--serif);font-size:12.5px;color:#7d7d7d;padding:2.2vh 0 3.4vh;letter-spacing:.1em}
+.f-small{text-align:center;font-family:var(--serif);font-size:12.5px;color:#7d7d7d;padding:2.2vh 0 3.4vh;letter-spacing:.1em;border-top:1px solid rgba(242,240,236,.18)}
 
 /* ---------- MOBILE 390 ---------- */
 @media (max-width:760px){
@@ -330,14 +333,29 @@ footer{background:#080808;color:var(--paper);padding:6vh 5vw 0;overflow:hidden;p
   .oline{margin-left:0!important}
   .oline p{font-size:16px}
   .oline span{font-size:12.5px}
-  .phoenix{width:70vw;opacity:.35}
-  .flow-title{font-size:24vw}
-  .fl-slide{width:86vw;justify-content:flex-end;padding-bottom:11vh}
-  .fl-slide:not(.alt){left:7vw}
-  .fl-slide.alt{right:7vw}
-  .fl-slide h3{font-size:23px}
+  .vel-seam{left:26px}
+  .fl-intro-side{display:none}
+  .fl-intro-copy{left:52px;right:6vw;max-width:none}
+  .flow-title{font-size:21vw}
+  .fl-intro-note{font-size:16px}
+  .seam-notch{display:none}
+  .fl-slide,.fl-slide.alt{width:auto;left:48px;right:5vw;max-width:none;padding:3.2vh 6vw 2.8vh;transform:translateY(-50%) translateX(22px)}
+  .fl-slide.act,.fl-slide.alt.act{transform:translateY(-50%) translateX(0)}
+  .fl-slide .pp-pin{left:-8px;right:auto}
+  .fl-slide h3{font-size:22px;margin-top:12px}
+  .fl-slide p{font-size:12.5px;line-height:1.9}
+  .fl-slide p .en{font-size:14px}
+  .pp-notches{margin-top:14px}
+  .fl-gauge{bottom:3vh}
+  .fl-stitches{width:110px}
+  .after-in::before{left:14px}
+  #data{padding-left:calc(5vw + 18px);padding-top:9vh}
+  .tape-strip{padding-right:12px}
+  .tape-strip span:nth-child(n+5){display:none}
   .data-grid{grid-template-columns:1fr}
-  #contactBtn{font-size:13.5vw}
+  #contact{padding-left:calc(5vw + 18px)}
+  .fit-card{padding:4.5vh 6vw 4vh}
+  #contactBtn{font-size:12.5vw}
+  footer{padding-left:calc(5vw + 18px)}
   .f-grid{grid-template-columns:1fr;gap:3.4vh}
-  .f-marquee{font-size:11vw}
 }
