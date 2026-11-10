@@ -347,7 +347,8 @@ var handlers=[
   apWheel,
   omoiWheel,
   flWheel,
-  function(dy){
+  function(dy,now,src){
+    if(src==="wheel"&&lenisAfter)return; /* #after wheel feed is owned by the Lenis virtual-scroll layer (see tail block) */
     if(dy<0&&afterS.tgt<=0){goChapter(5);return;}
     afterS.tgt=clamp(afterS.tgt+dy*1.15,0,afterMax());
   }
@@ -355,18 +356,18 @@ var handlers=[
 
 /* ================= ONE master dispatcher ================= */
 var menuOpen=false;
-function dispatch(dy){
+function dispatch(dy,src){
   var now=performance.now();
   if(menuOpen){ if(Math.abs(dy)>=2)srcS.tgt=clamp(srcS.tgt+clamp(dy,-160,160),0,srcMax()); return; }
   if(modalOpen){ if(Math.abs(dy)>=2)modalS.tgt=clamp(modalS.tgt+dy*0.6,0,modalMax()); return; }
   if(!loaderDone||busy)return;
   if(Math.abs(dy)<8)return;
   if(now<wheelLockUntil)return;
-  handlers[cur](dy,now);
+  handlers[cur](dy,now,src);
 }
 addEventListener("wheel",function(e){
   e.preventDefault();
-  dispatch(e.deltaY);
+  dispatch(e.deltaY,"wheel");
 },{passive:false});
 /* touch -> synthetic wheel steps of ~14px */
 var tLast=null,tAcc=0,tDir=0;
@@ -434,6 +435,71 @@ var cio=new IntersectionObserver(function(es){es.forEach(function(e){
   (function step(ts){if(!t0)t0=ts;var k=clamp((ts-t0)/1600,0,1);e.target.textContent=Math.floor(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);})(performance.now());
 });},{threshold:0.4});
 document.querySelectorAll(".count").forEach(function(e){cio.observe(e);});
+
+/* ================= TAIL MOTION (v6 — Contact + Footer only) =================
+   GSAP + ScrollTrigger (vendored locally, registered once). The chapter engine
+   never natively scrolls, so a window-scroller ScrollTrigger could never fire:
+   the Contact timeline is played by IntersectionObserver, and the Footer name
+   timeline is scrubbed from afterS progress inside the main rAF loop.
+   Initial states are set ONLY from JS inside the GSAP guard — if GSAP fails to
+   load, or reduced motion is preferred, the content is simply fully visible. */
+var reduceMotion=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+var contactTl=null,footTl=null,footEl=afterIn.querySelector("footer"),footNameEl=footEl?footEl.querySelector(".f-name"):null;
+if(window.gsap&&!reduceMotion){
+  if(window.ScrollTrigger){try{gsap.registerPlugin(ScrollTrigger);}catch(e){}}
+  var gsItems=document.querySelectorAll("#contact .gs-item");
+  if(gsItems.length){
+    gsap.set(gsItems,{opacity:0,y:34});
+    contactTl=gsap.timeline({paused:true});
+    contactTl.to(gsItems,{opacity:1,y:0,duration:0.85,ease:"power3.out",stagger:0.08}); /* 80ms stagger, transform+opacity only */
+  }
+  if(footNameEl){
+    gsap.set(footNameEl,{opacity:0,y:70,scale:0.96,transformOrigin:"0 100%"});
+    footTl=gsap.timeline({paused:true});
+    footTl.to(footNameEl,{opacity:1,y:0,scale:1,duration:1,ease:"none"});
+  }
+  var cBtn=$("contactBtn");
+  if(cBtn){
+    cBtn.addEventListener("pointerdown",function(){gsap.to(cBtn,{scale:0.965,duration:0.12,ease:"power2.out"});});
+    ["pointerup","pointerleave"].forEach(function(ev){cBtn.addEventListener(ev,function(){gsap.to(cBtn,{scale:1,duration:0.3,ease:"power3.out"});});});
+  }
+}
+if(contactTl){
+  var tailIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){contactTl.play();tailIO.disconnect();}});},{threshold:0.25});
+  tailIO.observe($("contact"));
+}
+function footScrub(){
+  if(!footTl||!footEl)return;
+  var start=footEl.offsetTop-vh(),p=clamp((afterS.cur-start)/(vh()*0.55),0,1);
+  footTl.progress(p);
+}
+
+/* ================= LENIS (vendored) — wheel layer for the #after chapter =================
+   Lenis runs in virtual-scroll mode: its VirtualScroll layer captures wheel
+   input and normalises deltaMode (line/page units -> px), and the callback
+   feeds the #after sub-scroller target. The callback always returns false, so
+   Lenis itself never scrolls the window and never transforms content; the
+   final easing to the target stays the engine's own pxStep (.12 lerp), driven
+   in the rAF loop which also advances lenis.raf(). Touch and keyboard keep
+   the dispatcher's original path; dispatcher wheel events in chapter 6 are
+   skipped (see handlers[6]) so nothing is fed twice. Boundaries mirror the
+   dispatcher exactly: same |dy|>=8 gate, same wheel lock, scroll-up at the
+   very top of #after returns to Flow (chapter 5). */
+var lenisAfter=null,lenisTarget=0,lenisFed=false;
+if(window.Lenis){
+  try{
+    lenisAfter=new Lenis({lerp:0.12,smoothWheel:true,autoRaf:false,virtualScroll:function(data){
+      if(!data||!data.event||data.event.type!=="wheel")return false;
+      if(cur!==6||menuOpen||modalOpen||!loaderDone||busy)return false;
+      var dy=data.deltaY,now=performance.now();
+      if(Math.abs(dy)<8||now<wheelLockUntil)return false;
+      if(dy<0&&afterS.tgt<=0&&lenisTarget<=0){lenisTarget=0;goChapter(5);return false;}
+      lenisTarget=clamp(lenisTarget+dy*1.15,0,afterMax());
+      lenisFed=true;
+      return false;
+    }});
+  }catch(e){lenisAfter=null;}
+}
 
 /* ================= burns: loader / omoi / contact ================= */
 var ldBurnCv=$("ldBurn");ldBurnCv.width=192;ldBurnCv.height=108;
@@ -509,11 +575,13 @@ function raf(now){
     if(cur===4)omoiRender();
     if(cur===5)flRender(now);
     if(cur===6){
+      if(lenisAfter){lenisAfter.raf(now);if(lenisFed){afterS.tgt=lenisTarget;lenisFed=false;}else{lenisTarget=afterS.tgt;}}
       pxStep(afterS);
       afterIn.style.transform="translateY("+(-afterS.cur)+"px)";
       var foot=afterIn.querySelector("footer");
       var fd=afterS.cur+vh()>foot.offsetTop+140;
       if(fd!==afterFooterDark){afterFooterDark=fd;setHeader();}
+      footScrub();
     }
   }
   /* about scalar feeding (accumulates from wheel while in about) */

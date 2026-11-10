@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&family=Shippori+Mincho+B1:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=5">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 </head>
 <body>
@@ -313,26 +313,25 @@
     </div>
 
     <div id="contact">
-      <div class="fit-card">
-        <div class="c-script script">Contact</div>
-        <div class="fit-label">BY APPOINTMENT — THE FITTING</div>
-        <div class="c-lines">
-          <p class="grey fade">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
-          <p class="black fade">Only The Will To Be Seen<br>Stays The Same.</p>
-          <p class="bigger fade">Now It Is Your Turn<br>To Summon Us.</p>
-        </div>
-        <p class="c-bar fade">The tools change — the will to be seen does not.</p>
-        <p class="c-en serif fade">Silk, type, code, AI. Whatever the tool of the age, the wish to be truly seen is the one material that never goes out of season.</p>
-        <div class="c-rule"></div>
-        <a id="contactBtn" href="mailto:atelier@velmara.example">CONTACT US</a>
+      <span class="tie-seam" aria-hidden="true"></span>
+      <div class="c-script script gs-item">Contact</div>
+      <div class="c-lines">
+        <p class="grey gs-item">Fabrics Change.<br>Silk, Thread, Code, AI.</p>
+        <p class="black gs-item">Only The Will To Be Seen<br>Stays The Same.</p>
+        <p class="bigger gs-item">Now It Is Your Turn<br>To Summon Us.</p>
       </div>
+      <p class="c-bar gs-item">The tools change — the will to be seen does not.</p>
+      <p class="c-en serif gs-item">Silk, type, code, AI. Whatever the tool of the age, the wish to be truly seen is the one material that never goes out of season.</p>
+      <a id="contactBtn" class="gs-item" href="mailto:atelier@velmara.example">CONTACT US</a>
     </div>
 
     <footer>
+      <span class="tie-seam foot" aria-hidden="true"><i class="knot"></i></span>
       <div class="f-top">
         <span class="script f-logo">Velmara</span>
         <button class="f-menu" id="footMenuBtn" type="button">MENU</button>
       </div>
+      <div class="f-name" aria-hidden="true">VELMARA</div>
       <div class="f-seam-end" aria-hidden="true"><i></i><span>SEAM FINISHED — KNOT &amp; CUT</span></div>
       <div class="f-grid">
         <div class="f-company">
@@ -352,6 +351,9 @@
 </section>
 </main>
 
-<script src="assets/js/main.js?v=5"></script>
+<script src="assets/js/vendor/gsap.min.js?v=6"></script>
+<script src="assets/js/vendor/ScrollTrigger.min.js?v=6"></script>
+<script src="assets/js/vendor/lenis.min.js?v=6"></script>
+<script src="assets/js/main.js?v=6"></script>
 </body>
 </html>
