@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SAMPLE — The Fabric Drop · Proposed Velmara Transition (not applied)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f2ee; --ink:#070605; --red:#d7141a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:'Jost',sans-serif;background:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent}
+  .script{font-family:'Pinyon Script',cursive;font-weight:400}
+  .huge{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.94;letter-spacing:.005em}
+
+  /* ---------- demo screens ---------- */
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer}
+  .screen.act{display:flex}
+  .screen .script{font-size:clamp(44px,7vw,84px);line-height:1}
+  .screen .huge{font-size:clamp(56px,12.5vw,168px);margin-top:2vh}
+  .screen .small{margin-top:3.2vh;font-size:12px;letter-spacing:.34em;text-transform:uppercase;opacity:.72}
+  .s1{background:var(--paper);color:var(--ink)}
+  .s2{background:var(--ink);color:var(--paper)}
+  .s3{background:var(--red);color:var(--paper)}
+  .s3 .huge{font-size:clamp(64px,15vw,200px)}
+
+  /* ---------- the cloth ---------- */
+  #cloth{position:fixed;inset:0;z-index:20;pointer-events:none;transform:translateY(102%);will-change:transform;
+    display:flex;align-items:center;justify-content:center}
+  #cloth::before{content:"";position:absolute;top:0;bottom:0;left:20px;border-left:2px dashed currentColor;opacity:.45}
+  #cloth .c-script{font-size:clamp(26px,3.4vw,40px);opacity:.92}
+  #cloth.paper{background:var(--paper);color:var(--ink)}
+  #cloth.black{background:var(--ink);color:var(--paper)}
+  #cloth.red{background:var(--red);color:var(--paper)}
+
+  /* ---------- chrome ---------- */
+  #caption{position:fixed;top:16px;left:18px;z-index:30;font-size:11px;letter-spacing:.26em;text-transform:uppercase;line-height:1.7;pointer-events:none;transition:color .3s}
+  #caption.on-dark{color:var(--paper)} #caption.on-light{color:var(--ink)}
+  #nextBtn{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:30;min-height:56px;min-width:210px;
+    padding:16px 30px;font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+    border-radius:99px;border:1px solid transparent;cursor:pointer;transition:background .3s,color .3s,border-color .3s}
+  #nextBtn.on-light{background:var(--ink);color:var(--paper)}
+  #nextBtn.on-dark{background:var(--paper);color:var(--ink)}
+  #nextBtn:active{transform:translateX(-50%) scale(.97)}
+  #count{position:fixed;right:18px;top:16px;z-index:30;font-size:11px;letter-spacing:.26em;transition:color .3s}
+  #count.on-dark{color:var(--paper)} #count.on-light{color:var(--ink)}
+  @media (max-width:480px){
+    #caption{font-size:9.5px;left:14px;top:12px;max-width:62vw}
+    #count{right:14px;top:12px}
+    #nextBtn{bottom:20px;min-width:230px;white-space:nowrap}
+    .screen .small{letter-spacing:.24em;padding:0 8px}
+  }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1 · paper -->
+<section class="screen s1 act" data-name="paper">
+  <div class="script">Velmara</div>
+  <h1 class="huge">Thread to<br>Runway</h1>
+  <p class="small">Screen 1 — Hero (paper)</p>
+</section>
+
+<!-- SCREEN 2 · black -->
+<section class="screen s2" data-name="black">
+  <div class="script">The</div>
+  <h1 class="huge">Align<br>Flow</h1>
+  <p class="small">Screen 2 — Flow (black)</p>
+</section>
+
+<!-- SCREEN 3 · red -->
+<section class="screen s3" data-name="red">
+  <h1 class="huge">Summon<br>Us</h1>
+  <p class="small">Screen 3 — Contact (red)</p>
+</section>
+
+<!-- THE CLOTH -->
+<div id="cloth" class="black" aria-hidden="true"><span class="c-script script">Velmara</span></div>
+
+<div id="caption" class="on-light">Proposed transition — The Fabric Drop<br>cover 0.5s · reveal 0.55s</div>
+<div id="count" class="on-light">1 / 3</div>
+<button id="nextBtn" class="on-light" type="button">Next Screen →</button>
+
+<script>
+(function(){
+  var screens=[].slice.call(document.querySelectorAll(".screen"));
+  var cloth=document.getElementById("cloth");
+  var caption=document.getElementById("caption");
+  var count=document.getElementById("count");
+  var btn=document.getElementById("nextBtn");
+  var cur=0, busy=false;
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var NAMES=["paper","black","red"];
+  var COVER=500, REVEAL=550; /* ms — the proposed timings */
+
+  function easeInOut(t){ return t<.5 ? 8*t*t*t*t : 1-Math.pow(-2*t+2,4)/2; } /* power4.inOut */
+
+  function setChrome(i){
+    var light = NAMES[i]==="paper";
+    caption.className = light ? "on-light" : "on-dark";
+    count.className   = light ? "on-light" : "on-dark";
+    btn.className     = light ? "on-light" : "on-dark";
+    count.textContent = (i+1)+" / 3";
+  }
+  function swapTo(i){
+    screens[cur].classList.remove("act");
+    cur=i;
+    screens[cur].classList.add("act");
+    setChrome(cur);
+  }
+  function setCloth(yPct,skewDeg){
+    cloth.style.transform="translateY("+yPct+"%) skewY("+skewDeg+"deg)";
+  }
+  function advance(){
+    if(busy) return;
+    var next=(cur+1)%screens.length;
+    if(reduced){ swapTo(next); return; }
+    busy=true;
+    cloth.className=NAMES[next]; /* cloth wears the DESTINATION colour */
+    var t0=performance.now();
+    function frame(now){
+      var t=now-t0;
+      if(t<COVER){ /* rising to cover */
+        var e=easeInOut(t/COVER);
+        setCloth((1-e)*102, Math.sin(e*Math.PI)*1.2);
+        requestAnimationFrame(frame);
+      } else if(t<COVER+30){ /* full cover — swap underneath (one frame held) */
+        setCloth(0,0);
+        if(!frame.swapped){ frame.swapped=true; swapTo(next); }
+        requestAnimationFrame(frame);
+      } else if(t<COVER+30+REVEAL){ /* keeps rising, off the top */
+        var e2=easeInOut((t-COVER-30)/REVEAL);
+        setCloth(-e2*102, -Math.sin(e2*Math.PI)*1.2);
+        requestAnimationFrame(frame);
+      } else {
+        setCloth(102,0); /* park back below for the next run */
+        frame.swapped=false;
+        busy=false;
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  btn.addEventListener("click",function(ev){ ev.stopPropagation(); advance(); });
+  screens.forEach(function(s){ s.addEventListener("click",advance); });
+  var wheelLock=false;
+  window.addEventListener("wheel",function(ev){
+    if(busy||wheelLock) return;
+    if(Math.abs(ev.deltaY)<4) return;
+    wheelLock=true; setTimeout(function(){wheelLock=false;},1150);
+    advance();
+  },{passive:true});
+  var touchY=null;
+  window.addEventListener("touchstart",function(ev){ touchY=ev.touches[0].clientY; },{passive:true});
+  window.addEventListener("touchend",function(ev){
+    if(touchY===null) return;
+    var dy=touchY-ev.changedTouches[0].clientY; touchY=null;
+    if(Math.abs(dy)>40) advance();
+  },{passive:true});
+  window.addEventListener("keydown",function(ev){
+    if(ev.key===" "||ev.key==="ArrowRight"||ev.key==="ArrowDown"){ ev.preventDefault(); advance(); }
+  });
+  setChrome(0);
+  /* probe hook for automated QA */
+  window.__fabric={advance:advance,state:function(){return{cur:cur,busy:busy,cloth:cloth.style.transform,clothClass:cloth.className,active:screens[cur].getAttribute("data-name")};}};
+})();
+</script>
+</body>
+</html>
