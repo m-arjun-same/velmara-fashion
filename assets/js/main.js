@@ -426,33 +426,36 @@ document.querySelectorAll(".viewmore").forEach(function(b){b.addEventListener("c
 $("modalClose").addEventListener("click",closeModal);
 modal.addEventListener("click",function(e){if(e.target===modal)closeModal();});
 
-/* ================= reveals + counters (after chapter) ================= */
+/* ================= reveals (after chapter) ================= */
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:0.2});
 document.querySelectorAll("#after .fade").forEach(function(e){io.observe(e);});
-var cio=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(!e.isIntersecting)return;cio.unobserve(e.target);
-  var to=+e.target.getAttribute("data-to"),t0=null;
-  (function step(ts){if(!t0)t0=ts;var k=clamp((ts-t0)/1600,0,1);e.target.textContent=Math.floor(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);})(performance.now());
-});},{threshold:0.4});
-document.querySelectorAll(".count").forEach(function(e){cio.observe(e);});
 
-/* ================= TAIL MOTION (v6 — Contact + Footer only) =================
+/* Data counters — started by the Data curtain below, so the numbers count up
+   as the split fields arrive (same 1600ms cubic-out count as before). */
+var countersStarted=false;
+function startDataCounters(){
+  if(countersStarted)return;countersStarted=true;
+  document.querySelectorAll(".count").forEach(function(e){
+    var to=+e.getAttribute("data-to"),t0=null;
+    (function step(ts){if(!t0)t0=ts;var k=clamp((ts-t0)/1600,0,1);e.textContent=Math.floor(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);})(performance.now());
+  });
+}
+
+/* ================= TAIL MOTION (v7 — Data + Contact curtains; Footer as v6) =================
    GSAP + ScrollTrigger (vendored locally, registered once). The chapter engine
    never natively scrolls, so a window-scroller ScrollTrigger could never fire:
-   the Contact timeline is played by IntersectionObserver, and the Footer name
+   section entrances are played by IntersectionObserver, and the Footer name
    timeline is scrubbed from afterS progress inside the main rAF loop.
-   Initial states are set ONLY from JS inside the GSAP guard — if GSAP fails to
-   load, or reduced motion is preferred, the content is simply fully visible. */
+   v7: Data and Contact share ONE entrance — "the curtain": each section's
+   whole field wipes in as a single piece (clip-path inset(100% 0 0 0) ->
+   inset(0)), played once when the section enters. No item-by-item fades or
+   staggers in these two sections; content rides inside as one composed group.
+   Initial states are set ONLY from JS inside the GSAP guard — if GSAP fails
+   to load, or reduced motion is preferred, the content is simply fully visible. */
 var reduceMotion=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
-var contactTl=null,footTl=null,footEl=afterIn.querySelector("footer"),footNameEl=footEl?footEl.querySelector(".f-name"):null;
+var footTl=null,footEl=afterIn.querySelector("footer"),footNameEl=footEl?footEl.querySelector(".f-name"):null;
 if(window.gsap&&!reduceMotion){
   if(window.ScrollTrigger){try{gsap.registerPlugin(ScrollTrigger);}catch(e){}}
-  var gsItems=document.querySelectorAll("#contact .gs-item");
-  if(gsItems.length){
-    gsap.set(gsItems,{opacity:0,y:34});
-    contactTl=gsap.timeline({paused:true});
-    contactTl.to(gsItems,{opacity:1,y:0,duration:0.85,ease:"power3.out",stagger:0.08}); /* 80ms stagger, transform+opacity only */
-  }
   if(footNameEl){
     gsap.set(footNameEl,{opacity:0,y:70,scale:0.96,transformOrigin:"0 100%"});
     footTl=gsap.timeline({paused:true});
@@ -464,9 +467,48 @@ if(window.gsap&&!reduceMotion){
     ["pointerup","pointerleave"].forEach(function(ev){cBtn.addEventListener(ev,function(){gsap.to(cBtn,{scale:1,duration:0.3,ease:"power3.out"});});});
   }
 }
-if(contactTl){
-  var tailIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){contactTl.play();tailIO.disconnect();}});},{threshold:0.25});
-  tailIO.observe($("contact"));
+/* THE CURTAIN — shared one-shot wipe for #data and #contact.
+   The clip-path animates each section's inner .curtain-in wrapper, NOT the
+   section itself: an element's own clip-path clips its IntersectionObserver
+   intersection rect too, so a fully-clipped section would report
+   isIntersecting=false forever and its own trigger could never fire (proven
+   in the v7 probe). The observer watches the unclipped section; the wrapper
+   carries the field and wipes inside it.
+   #data sits at the top of #after, so its observer can fire before the chapter
+   is on stage; in that case the curtain stays pending and the rAF loop fires
+   it the moment chapter 6 is active (see curtainsPending in the loop). */
+var curtains=[];
+function addCurtain(el,onStart){
+  if(!el)return;
+  var inner=el.querySelector(".curtain-in")||el;
+  if(window.gsap&&!reduceMotion)gsap.set(inner,{clipPath:"inset(100% 0% 0% 0%)"});
+  curtains.push({el:el,inner:inner,onStart:onStart||null,fired:false,pending:false});
+}
+function fireCurtain(c){
+  if(c.fired)return;c.fired=true;
+  if(window.gsap&&!reduceMotion){
+    gsap.to(c.inner,{clipPath:"inset(0% 0% 0% 0%)",duration:0.95,ease:"power4.inOut"});
+  }
+  if(c.onStart)c.onStart();
+}
+var curtainIO=new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(!e.isIntersecting)return;
+    curtainIO.unobserve(e.target);
+    for(var i=0;i<curtains.length;i++){
+      if(curtains[i].el===e.target){
+        if(cur===6)fireCurtain(curtains[i]);else curtains[i].pending=true;
+      }
+    }
+  });
+},{threshold:0.12});
+addCurtain($("data"),startDataCounters);
+addCurtain($("contact"),null);
+curtains.forEach(function(c){curtainIO.observe(c.el);});
+function curtainsPending(){
+  for(var i=0;i<curtains.length;i++){
+    if(curtains[i].pending){curtains[i].pending=false;fireCurtain(curtains[i]);}
+  }
 }
 function footScrub(){
   if(!footTl||!footEl)return;
@@ -581,6 +623,7 @@ function raf(now){
       var foot=afterIn.querySelector("footer");
       var fd=afterS.cur+vh()>foot.offsetTop+140;
       if(fd!==afterFooterDark){afterFooterDark=fd;setHeader();}
+      curtainsPending();
       footScrub();
     }
   }
