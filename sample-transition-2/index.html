@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SAMPLE 2 — Push / Blinds · Proposed Velmara Transitions (not applied)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4f2ee; --ink:#070605; --red:#d7141a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:'Jost',sans-serif;background:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent}
+  .script{font-family:'Pinyon Script',cursive;font-weight:400}
+  .huge{font-family:'Anton',sans-serif;text-transform:uppercase;line-height:.94;letter-spacing:.005em}
+
+  /* ---------- demo screens (stacked layers) ---------- */
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;will-change:transform}
+  .screen.act{display:flex}
+  .screen .script{font-size:clamp(44px,7vw,84px);line-height:1}
+  .screen .huge{font-size:clamp(56px,12.5vw,168px);margin-top:2vh}
+  .screen .small{margin-top:3.2vh;font-size:12px;letter-spacing:.34em;text-transform:uppercase;opacity:.72}
+  .s1{background:var(--paper);color:var(--ink)}
+  .s2{background:var(--ink);color:var(--paper)}
+  .s3{background:var(--red);color:var(--paper)}
+  .s3 .huge{font-size:clamp(64px,15vw,200px)}
+  .screen.pushing{box-shadow:0 -34px 70px rgba(0,0,0,.38)}
+
+  /* ---------- the blinds ---------- */
+  #blinds{position:fixed;inset:0;z-index:20;pointer-events:none;overflow:hidden;visibility:hidden}
+  .strip{position:absolute;top:0;height:100%;will-change:transform;
+    box-shadow:inset -1px 0 0 rgba(0,0,0,.28)}
+  .strip.paper{background:var(--paper)}
+  .strip.black{background:var(--ink)}
+  .strip.red{background:var(--red)}
+
+  /* ---------- chrome ---------- */
+  #caption{position:fixed;top:16px;left:18px;z-index:30;font-size:11px;letter-spacing:.26em;text-transform:uppercase;line-height:1.7;pointer-events:none;transition:color .3s}
+  #caption.on-dark{color:var(--paper)} #caption.on-light{color:var(--ink)}
+  #count{position:fixed;right:18px;top:16px;z-index:30;font-size:11px;letter-spacing:.26em;transition:color .3s}
+  #count.on-dark{color:var(--paper)} #count.on-light{color:var(--ink)}
+  #nextBtn{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:30;min-height:56px;min-width:210px;
+    padding:16px 30px;font-family:'Jost',sans-serif;font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+    border-radius:99px;border:1px solid transparent;cursor:pointer;transition:background .3s,color .3s,border-color .3s}
+  #nextBtn.on-light{background:var(--ink);color:var(--paper)}
+  #nextBtn.on-dark{background:var(--paper);color:var(--ink)}
+  #nextBtn:active{transform:translateX(-50%) scale(.97)}
+  #prevBtn{position:fixed;right:18px;bottom:26px;z-index:30;min-height:56px;padding:16px 22px;
+    font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.26em;text-transform:uppercase;
+    border-radius:99px;background:transparent;cursor:pointer;transition:color .3s,border-color .3s}
+  #prevBtn.on-light{color:var(--ink);border:1px solid rgba(7,6,5,.45)}
+  #prevBtn.on-dark{color:var(--paper);border:1px solid rgba(244,242,238,.5)}
+  #styles{position:fixed;left:18px;bottom:26px;z-index:30;display:flex;gap:8px}
+  .styleBtn{min-height:56px;padding:14px 18px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    border-radius:99px;background:transparent;cursor:pointer;transition:all .25s}
+  .styleBtn.on-light{color:var(--ink);border:1px solid rgba(7,6,5,.45)}
+  .styleBtn.on-dark{color:var(--paper);border:1px solid rgba(244,242,238,.5)}
+  .styleBtn.sel.on-light{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .styleBtn.sel.on-dark{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+  @media (max-width:480px){
+    #caption{font-size:9.5px;left:14px;top:12px;max-width:62vw}
+    #count{right:14px;top:12px}
+    #nextBtn{bottom:86px;min-width:230px;white-space:nowrap}
+    #styles{left:14px;bottom:20px}
+    #prevBtn{right:14px;bottom:20px}
+    .styleBtn{min-height:52px;padding:12px 14px;font-size:11px}
+    .screen .small{letter-spacing:.24em;padding:0 8px}
+  }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1 · paper -->
+<section class="screen s1 act" data-name="paper">
+  <div class="script">Velmara</div>
+  <h1 class="huge">Thread to<br>Runway</h1>
+  <p class="small">Screen 1 — Hero (paper)</p>
+</section>
+
+<!-- SCREEN 2 · black -->
+<section class="screen s2" data-name="black">
+  <div class="script">The</div>
+  <h1 class="huge">Align<br>Flow</h1>
+  <p class="small">Screen 2 — Flow (black)</p>
+</section>
+
+<!-- SCREEN 3 · red -->
+<section class="screen s3" data-name="red">
+  <h1 class="huge">Summon<br>Us</h1>
+  <p class="small">Screen 3 — Contact (red)</p>
+</section>
+
+<!-- THE BLINDS (6 strips, colour set per destination) -->
+<div id="blinds" aria-hidden="true"></div>
+
+<div id="caption" class="on-light">A · The Push — screens slide together, no cover</div>
+<div id="count" class="on-light">1 / 3</div>
+<div id="styles">
+  <button class="styleBtn sel on-light" id="btnPush" type="button">A · PUSH</button>
+  <button class="styleBtn on-light" id="btnBlinds" type="button">B · BLINDS</button>
+</div>
+<button id="prevBtn" class="on-light" type="button">← Prev</button>
+<button id="nextBtn" class="on-light" type="button">Next Screen →</button>
+
+<script src="../assets/js/vendor/gsap.min.js"></script>
+<script>
+(function(){
+  var screens=[].slice.call(document.querySelectorAll(".screen"));
+  var blindsBox=document.getElementById("blinds");
+  var caption=document.getElementById("caption");
+  var count=document.getElementById("count");
+  var btn=document.getElementById("nextBtn");
+  var prevBtn=document.getElementById("prevBtn");
+  var btnPush=document.getElementById("btnPush");
+  var btnBlinds=document.getElementById("btnBlinds");
+  var styleBtns=[btnPush,btnBlinds];
+  var cur=0, busy=false, style="push";
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hasGsap=typeof window.gsap!=="undefined";
+  var NAMES=["paper","black","red"];
+  var CAPTIONS={
+    push:"A · The Push — screens slide together, no cover",
+    blinds:"B · The Blinds — six strips sweep in, swap, sweep out"
+  };
+
+  /* build the 6 strips */
+  var strips=[];
+  for(var i=0;i<6;i++){
+    var st=document.createElement("div");
+    st.className="strip black";
+    st.style.left=(i*(100/6))+"%";
+    st.style.width=(100/6+0.15)+"%"; /* slight overlap so no hairline gaps at full tile */
+    blindsBox.appendChild(st);
+    strips.push(st);
+  }
+  /* park strips above the screen with GSAP only (never a CSS transform —
+     GSAP layers yPercent on top of a parsed CSS translate, doubling it) */
+  if(hasGsap){ gsap.set(strips,{yPercent:-103}); blindsBox.style.visibility="visible"; }
+
+  function setChrome(i){
+    var light = NAMES[i]==="paper";
+    var cls = light ? "on-light" : "on-dark";
+    caption.className=cls; count.className=cls; btn.className=cls; prevBtn.className=cls;
+    styleBtns.forEach(function(b){ b.classList.remove("on-light","on-dark"); b.classList.add(cls); });
+    count.textContent=(i+1)+" / 3";
+  }
+  function setStyle(s){
+    style=s;
+    btnPush.classList.toggle("sel",s==="push");
+    btnBlinds.classList.toggle("sel",s==="blinds");
+    caption.textContent=CAPTIONS[s];
+  }
+  function showOnly(i){
+    screens.forEach(function(sc,j){
+      sc.classList.toggle("act",j===i);
+      if(hasGsap) gsap.set(sc,{clearProps:"transform,boxShadow"});
+      sc.classList.remove("pushing");
+      sc.style.zIndex="";
+    });
+  }
+  function swapTo(i){ cur=i; showOnly(i); setChrome(cur); }
+
+  /* ---------- A · THE PUSH ---------- */
+  function pushTo(next,dir){ /* dir: +1 forward (up), -1 backward (down) */
+    var out=screens[cur], inn=screens[next];
+    busy=true;
+    inn.classList.add("act");
+    out.style.zIndex=2; inn.style.zIndex=3;
+    inn.classList.add("pushing");
+    gsap.set(inn,{yPercent:100*dir,scale:1});
+    gsap.set(out,{yPercent:0,scale:1});
+    var tl=gsap.timeline({onComplete:function(){
+      inn.classList.remove("pushing");
+      cur=next; showOnly(cur); setChrome(cur);
+      busy=false;
+    }});
+    tl.to(out,{yPercent:-100*dir,scale:0.94,duration:0.85,ease:"power4.inOut"},0)
+      .to(inn,{yPercent:0,scale:1,duration:0.85,ease:"power4.inOut"},0);
+  }
+
+  /* ---------- B · THE BLINDS ---------- */
+  function blindsTo(next){
+    busy=true;
+    strips.forEach(function(st){ st.className="strip "+NAMES[next]; });
+    gsap.set(strips,{yPercent:-103});
+    var tl=gsap.timeline({onComplete:function(){
+      gsap.set(strips,{yPercent:-103}); /* park above again */
+      busy=false;
+    }});
+    tl.to(strips,{yPercent:0,duration:0.45,ease:"power4.inOut",stagger:0.045})
+      .add(function(){ swapTo(next); }) /* swap while fully tiled */
+      .to(strips,{yPercent:103,duration:0.4,ease:"power4.inOut",stagger:0.045},"+=0.06");
+  }
+
+  function go(dir){
+    if(busy) return;
+    var next=(cur+dir+screens.length)%screens.length;
+    if(reduced||!hasGsap){ swapTo(next); return; }
+    if(style==="push") pushTo(next,dir); else blindsTo(next);
+  }
+  function advance(){ go(1); }
+  function back(){ go(-1); }
+
+  btn.addEventListener("click",function(ev){ ev.stopPropagation(); advance(); });
+  prevBtn.addEventListener("click",function(ev){ ev.stopPropagation(); back(); });
+  btnPush.addEventListener("click",function(ev){ ev.stopPropagation(); setStyle("push"); });
+  btnBlinds.addEventListener("click",function(ev){ ev.stopPropagation(); setStyle("blinds"); });
+  screens.forEach(function(s){ s.addEventListener("click",advance); });
+  var wheelLock=false;
+  window.addEventListener("wheel",function(ev){
+    if(busy||wheelLock) return;
+    if(Math.abs(ev.deltaY)<4) return;
+    wheelLock=true; setTimeout(function(){wheelLock=false;},1300);
+    if(ev.shiftKey||ev.deltaY<0) back(); else advance();
+  },{passive:true});
+  var touchY=null;
+  window.addEventListener("touchstart",function(ev){ touchY=ev.touches[0].clientY; },{passive:true});
+  window.addEventListener("touchend",function(ev){
+    if(touchY===null) return;
+    var dy=touchY-ev.changedTouches[0].clientY; touchY=null;
+    if(dy>40) advance(); else if(dy<-40) back();
+  },{passive:true});
+  window.addEventListener("keydown",function(ev){
+    if(ev.key===" "||ev.key==="ArrowRight"||ev.key==="ArrowDown"){ ev.preventDefault(); advance(); }
+    if(ev.key==="ArrowLeft"||ev.key==="ArrowUp"){ ev.preventDefault(); back(); }
+  });
+  setChrome(0); setStyle("push");
+  /* probe hook for automated QA */
+  window.__trans2={advance:advance,back:back,setStyle:setStyle,state:function(){
+    function tr(el){ var m=new DOMMatrixReadOnly(getComputedStyle(el).transform); return {y:m.f,scale:m.a}; }
+    return {cur:cur,busy:busy,style:style,active:NAMES[cur],
+      screens:screens.map(function(sc){ return {name:sc.getAttribute("data-name"),act:sc.classList.contains("act"),t:tr(sc)}; }),
+      strips:strips.map(function(st){ return tr(st).y; })};
+  }};
+})();
+</script>
+</body>
+</html>
