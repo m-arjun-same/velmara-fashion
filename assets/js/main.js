@@ -1,7 +1,7 @@
 /* VELMARA V3 — own JS. Motion system rebuilt from the mirror study's mechanics:
    no native scroll; ONE wheel/touch/keyboard dispatcher + chapter state machine;
    per-chapter 0..1 / px scalars with chapter lerp weights (.085 works, .12 sub, .05 hero fluid);
-   WebGL fbm domain-warp crossfade between chapters; reusable noise burn
+   Fabric Drop cloth transition between chapters (GSAP, approved sample); reusable noise burn
    (loader exit, philosophy entry); works text gate + breathing locks;
    12fps film grain over works. Every system is original code written for Velmara. */
 (function(){
@@ -27,7 +27,6 @@ clock();setInterval(clock,10000);
 /* ================= element refs ================= */
 function $(id){return document.getElementById(id);}
 var chapters=[$("hero"),$("about"),$("works"),$("approach"),$("omoi"),$("flow"),$("after")];
-var CH_BG=[[0.949,0.941,0.925],[0.051,0.051,0.047],[0.957,0.949,0.933],[1,1,1],[0.36,0.043,0.059],[0.024,0.024,0.024],[1,1,1]];
 var CH_DARK=[false,true,false,false,true,true,false];
 var header=$("siteHeader"),grainEl=$("grain");
 
@@ -70,60 +69,47 @@ function makeBurn(cv,base,centerBias){
   return {draw:draw};
 }
 
-/* ================= WebGL warp crossfade (own GLSL, fullscreen quad) ================= */
-var warpCv=$("warp"),warpGL=null,warpU={};
-(function initWarp(){
-  try{
-    var gl=warpCv.getContext("webgl",{alpha:true,antialias:false});
-    if(!gl)throw 0;
-    function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw 0;return s;}
-    var vs="attribute vec2 aP;varying vec2 vUv;void main(){vUv=aP*0.5+0.5;gl_Position=vec4(aP,0.,1.);}";
-    var fs=[
-"precision highp float;varying vec2 vUv;uniform float uP;uniform float uT;uniform vec3 uColA;uniform vec3 uColB;uniform float uWarp;",
-"float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
-"float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);}",
-"float fbm(vec2 p){float v=0.;float a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}",
-"void main(){vec2 cuv=vUv;",
-"vec2 q=vec2(fbm(cuv*2.2+uT*.04),fbm(cuv*2.2+vec2(5.2,1.3)-uT*.03));",
-"vec2 r=vec2(fbm(cuv*3.1+q*1.6+uT*.05),fbm(cuv*3.1+q*1.6+vec2(8.3,2.8)));",
-"cuv+=(r-.5)*.07*uWarp*(1.25-cuv.x)+.05*uWarp*vec2(r.y-.5,q.x-.5);",
-"float m=smoothstep(0.,1.,uP*1.25-(r.x-.5)*.4-.12);",
-"vec3 col=mix(uColA,uColB,m);",
-"col+=(q.x-.5)*.05;",
-"float a=sin(3.14159*clamp(uP,0.,1.));a=pow(a,.35);",
-"gl_FragColor=vec4(col,a);}"
-].join("\n");
-    var pr=gl.createProgram();
-    gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);
-    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw 0;
-    gl.useProgram(pr);
-    var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
-    var loc=gl.getAttribLocation(pr,"aP");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    ["uP","uT","uColA","uColB","uWarp"].forEach(function(n){warpU[n]=gl.getUniformLocation(pr,n);});
-    warpGL=gl;
-  }catch(e){warpGL=null;}
-})();
-function sizeWarp(){var d=Math.min(devicePixelRatio,1.5);warpCv.width=Math.floor(innerWidth*d);warpCv.height=Math.floor(innerHeight*d);if(warpGL)warpGL.viewport(0,0,warpCv.width,warpCv.height);}
-sizeWarp();
-var trans=null; /* {t0,dur,from,to,swapped,onSwap} */
-function startWarp(from,to,dur,onSwap){
-  if(!warpGL){onSwap();return;}
-  sizeWarp();warpCv.style.display="block";
-  trans={t0:performance.now(),dur:dur,from:from,to:to,swapped:false,onSwap:onSwap};
-  warpGL.uniform3fv(warpU.uColA,CH_BG[from]);warpGL.uniform3fv(warpU.uColB,CH_BG[to]);
-  warpGL.uniform1f(warpU.uWarp,1.4);
+/* ================= THE FABRIC DROP — chapter transition (GSAP) =================
+   One cloth panel in the DESTINATION chapter's colour covers the screen,
+   the chapter swaps underneath at full cover, and the cloth exits the way
+   it came. Forward (n>from): rises from the bottom, exits off the top.
+   Backward: descends from the top, exits off the bottom.
+   Cover 0.5s / reveal 0.55s, power4.inOut, skew sway +/-1.2deg — the exact
+   motion of the approved /sample-transition/ page. */
+var clothEl=$("cloth");
+var CLOTH=[
+  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}, /* 0 hero — paper */
+  {bg:"#070605",fg:"#f4f2ee",st:"#f4f2ee"}, /* 1 about — ink */
+  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}, /* 2 works — paper */
+  {bg:"#ffffff",fg:"#070605",st:"#d7141a"}, /* 3 approach — opens on its #fff stage (CSS #approach{background:#fff}) */
+  {bg:"#5c0b0f",fg:"#f4f2ee",st:"#f4f2ee"}, /* 4 omoi — charred red, centre of its radial gradient */
+  {bg:"#070605",fg:"#f4f2ee",st:"#f4f2ee"}, /* 5 flow — ink */
+  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}  /* 6 after — paper */
+];
+function swapChapter(from,n){
+  chapters[from].classList.remove("act");
+  chapters[n].classList.add("act");
+  cur=n;onEnter(n,from);
+  if(from===2)setTimeout(function(){chapters[2].classList.remove("exit");},60);
 }
-function stepWarp(now){
-  if(!trans)return;
-  var raw=clamp((now-trans.t0)/trans.dur,0,1),p=easeIO(raw);
-  if(raw>=0.5&&!trans.swapped){trans.swapped=true;trans.onSwap();}
-  if(warpGL){
-    warpGL.uniform1f(warpU.uP,p);warpGL.uniform1f(warpU.uT,now/1000);
-    warpGL.clearColor(0,0,0,0);warpGL.clear(warpGL.COLOR_BUFFER_BIT);
-    warpGL.drawArrays(warpGL.TRIANGLES,0,3);
-  }
-  if(raw>=1){warpCv.style.display="none";trans=null;busy=false;}
+function fabricDrop(from,n,onDone){
+  /* onDone releases the chapter lock. The swap at full cover is guaranteed:
+     timeline callback, plus a guard timer if the tween is interrupted. */
+  if(reduceMotion||!window.gsap||!clothEl){swapChapter(from,n);onDone();return;}
+  var c=CLOTH[n],fwd=n>from,swapped=false,finished=false;
+  clothEl.style.background=c.bg;clothEl.style.color=c.fg;
+  clothEl.style.setProperty("--stitch",c.st);
+  clothEl.style.visibility="visible";
+  function doSwap(){if(!swapped){swapped=true;swapChapter(from,n);}}
+  function doDone(){if(!finished){finished=true;clothEl.style.visibility="hidden";onDone();}}
+  var swapGuard=setTimeout(doSwap,750);
+  var doneGuard=setTimeout(function(){doSwap();try{gsap.killTweensOf(clothEl);}catch(e){}doDone();},2400);
+  function sway(sign){return function(){var p=this.progress();gsap.set(clothEl,{skewY:sign*Math.sin(p*Math.PI)*1.2});};}
+  gsap.timeline({onComplete:function(){clearTimeout(swapGuard);clearTimeout(doneGuard);doDone();}})
+    .set(clothEl,{yPercent:fwd?102:-102,skewY:0})
+    .to(clothEl,{yPercent:0,duration:0.5,ease:"power4.inOut",onUpdate:sway(1)})
+    .add(doSwap)
+    .to(clothEl,{yPercent:fwd?-102:102,duration:0.55,ease:"power4.inOut",onUpdate:sway(-1)});
 }
 
 /* ================= chapter state machine ================= */
@@ -150,16 +136,10 @@ function onEnter(n,from){
 }
 function goChapter(n){
   if(busy||n===cur||n<0||n>6||!loaderDone)return;
-  busy=true;wheelLockUntil=performance.now()+900;
+  busy=true;wheelLockUntil=performance.now()+1150; /* lock covers the full 1.05s Fabric Drop */
   var from=cur;
   if(from===2&&n===3)chapters[2].classList.add("exit"); /* works exit: blur + rise */
-  startWarp(from,n,from===0?1900:1600,function(){
-    chapters[from].classList.remove("act");
-    chapters[n].classList.add("act");
-    cur=n;onEnter(n,from);
-    if(from===2)setTimeout(function(){chapters[2].classList.remove("exit");},60);
-  });
-  if(!warpGL){busy=false;}
+  fabricDrop(from,n,function(){busy=false;});
 }
 
 /* ================= sub-scroller helper (px units, lerp .12, snap <.5) ================= */
@@ -596,8 +576,6 @@ function raf(now){
     ldBurn.draw(easeIO(lp));
     if(lp>=1){loader.style.display="none";loaderBurnAnim=null;loaderDone=true;ldPhase=2;setHeader();}
   }
-  /* warp transition */
-  stepWarp(now);
   /* hero fluid .05 */
   if(now-fluid.lastMove>1200)fluid.tgt=0.3;
   fluid.cur+=(fluid.tgt-fluid.cur)*0.05;
@@ -646,7 +624,6 @@ handlers[1]=function(dy,now){
 addEventListener("resize",function(){
   if(heroPetals)heroPetals.resize();
   if(apPetals)apPetals.resize();
-  sizeWarp();
   caseEls.forEach(function(c,i){
     var inner=c.querySelector(".case-txt-in"),box=c.querySelector(".case-txt");
     txtMax[i]=Math.max(0,inner.scrollHeight-box.clientHeight);
