@@ -403,13 +403,6 @@ document.querySelectorAll("[data-goto]").forEach(function(a){
     if(n!==cur){busy=false;goChapter(n);}
   });
 });
-var soundBtn=$("soundBtn");
-soundBtn.addEventListener("click",function(){
-  var on=soundBtn.getAttribute("aria-pressed")==="true";
-  soundBtn.setAttribute("aria-pressed",String(!on));
-  soundBtn.textContent=!on?"SOUND ON":"SOUND OFF";
-  soundBtn.classList.toggle("off",on);
-});
 var cases=[
 {img:"assets/img/img06.jpg",cat:"Official Campaign / Artist Experience",title:"The Resonance of Music, Worn Untouched.",body:"Shot over two days in natural light, the campaign follows one wearer the way a recital follows a single note — nothing staged steps in front of the garment. The series ran as a print editorial and a digital lookbook, and the featured coat sold out in nine days. Every seam is finished by hand, so the inside of the garment reads as calmly as the outside; a performer notices such things in the wings, in the thirty seconds before the lights change. The lookbook closes with the coat unworn, on a chair, still holding the shape of the body that left it — the afterglow, made visible."},
 {img:"assets/img/img08.jpg",cat:"Strategy / Creative Direction",title:"Read the Season, Draw the Strategy for Growth.",body:"We read the market and shaped the label's direction for three seasons ahead — one design language running through garments, packaging, lookbooks and film, so every touchpoint a customer meets delivers the same world, and the same promise. The work began with forty hours of listening, and ended with fewer pieces, better cloth, and a calendar that follows the wearer's year."},
