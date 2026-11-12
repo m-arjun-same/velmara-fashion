@@ -1,7 +1,7 @@
 /* VELMARA V3 — own JS. Motion system rebuilt from the mirror study's mechanics:
    no native scroll; ONE wheel/touch/keyboard dispatcher + chapter state machine;
    per-chapter 0..1 / px scalars with chapter lerp weights (.085 works, .12 sub, .05 hero fluid);
-   Fabric Drop cloth transition between chapters (GSAP, approved sample); reusable noise burn
+   Iris (forward) / Page Turn (backward) chapter transitions (GSAP, approved sample 3); reusable noise burn
    (loader exit, philosophy entry); works text gate + breathing locks;
    12fps film grain over works. Every system is original code written for Velmara. */
 (function(){
@@ -69,47 +69,79 @@ function makeBurn(cv,base,centerBias){
   return {draw:draw};
 }
 
-/* ================= THE FABRIC DROP — chapter transition (GSAP) =================
-   One cloth panel in the DESTINATION chapter's colour covers the screen,
-   the chapter swaps underneath at full cover, and the cloth exits the way
-   it came. Forward (n>from): rises from the bottom, exits off the top.
-   Backward: descends from the top, exits off the bottom.
-   Cover 0.5s / reveal 0.55s, power4.inOut, skew sway +/-1.2deg — the exact
-   motion of the approved /sample-transition/ page. */
-var clothEl=$("cloth");
-var CLOTH=[
-  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}, /* 0 hero — paper */
-  {bg:"#070605",fg:"#f4f2ee",st:"#f4f2ee"}, /* 1 about — ink */
-  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}, /* 2 works — paper */
-  {bg:"#ffffff",fg:"#070605",st:"#d7141a"}, /* 3 approach — opens on its #fff stage (CSS #approach{background:#fff}) */
-  {bg:"#5c0b0f",fg:"#f4f2ee",st:"#f4f2ee"}, /* 4 omoi — charred red, centre of its radial gradient */
-  {bg:"#070605",fg:"#f4f2ee",st:"#f4f2ee"}, /* 5 flow — ink */
-  {bg:"#f4f2ee",fg:"#070605",st:"#d7141a"}  /* 6 after — paper */
-];
-function swapChapter(from,n){
-  chapters[from].classList.remove("act");
-  chapters[n].classList.add("act");
-  cur=n;onEnter(n,from);
-  if(from===2)setTimeout(function(){chapters[2].classList.remove("exit");},60);
+/* ================= CHAPTER TRANSITIONS — E · IRIS forward / F · PAGE TURN backward (GSAP) =================
+   Approved in /sample-transition-3/ ("E & F both apply"). Direction decides:
+   FORWARD (n>from) — IRIS: the incoming chapter becomes active on top of the
+   outgoing (which stays visible + rendering as .under) and is revealed by a
+   clip-path circle expanding from screen centre, 0.8s power3.inOut.
+   BACKWARD (n<from) — PAGE TURN: the incoming chapter sits beneath (.under)
+   while the outgoing folds away on top: perspective(1600px) rotateY 0->+72deg,
+   transform-origin right centre, with a black shade growing to .55, 0.85s
+   power3.inOut.
+   Chapter roots carry no transforms of their own in CSS/JS (the only
+   exception, #works.exit, is a forward-only exit that never coincides with a
+   fold), so the fold is applied directly to the outgoing chapter element; the
+   shade is a dedicated .turn-shade child per chapter.
+   cur + onEnter side-effects run at flight START for both, so the incoming
+   chapter is live while it is revealed; transFrom keeps the outgoing chapter
+   rendering in the rAF loop until settle. Settle (timeline onComplete or the
+   done-guard timer) always lands on exactly one .act chapter with all
+   clips/transforms/shades cleared. No-GSAP / reduced-motion = instant swap. */
+var transFrom=-1,transTo=-1,transDone=null,transGuard=null,transSettled=true;
+function cleanChapterFx(i){
+  var el=chapters[i];
+  el.classList.remove("under");
+  if(window.gsap)gsap.set(el,{clearProps:"clipPath,transform,transformOrigin"});
+  else{el.style.clipPath="";el.style.transform="";el.style.transformOrigin="";}
+  var sh=el.querySelector(".turn-shade");
+  if(sh){if(window.gsap)gsap.set(sh,{clearProps:"opacity"});else sh.style.opacity="";}
 }
-function fabricDrop(from,n,onDone){
-  /* onDone releases the chapter lock. The swap at full cover is guaranteed:
-     timeline callback, plus a guard timer if the tween is interrupted. */
-  if(reduceMotion||!window.gsap||!clothEl){swapChapter(from,n);onDone();return;}
-  var c=CLOTH[n],fwd=n>from,swapped=false,finished=false;
-  clothEl.style.background=c.bg;clothEl.style.color=c.fg;
-  clothEl.style.setProperty("--stitch",c.st);
-  clothEl.style.visibility="visible";
-  function doSwap(){if(!swapped){swapped=true;swapChapter(from,n);}}
-  function doDone(){if(!finished){finished=true;clothEl.style.visibility="hidden";onDone();}}
-  var swapGuard=setTimeout(doSwap,750);
-  var doneGuard=setTimeout(function(){doSwap();try{gsap.killTweensOf(clothEl);}catch(e){}doDone();},2400);
-  function sway(sign){return function(){var p=this.progress();gsap.set(clothEl,{skewY:sign*Math.sin(p*Math.PI)*1.2});};}
-  gsap.timeline({onComplete:function(){clearTimeout(swapGuard);clearTimeout(doneGuard);doDone();}})
-    .set(clothEl,{yPercent:fwd?102:-102,skewY:0})
-    .to(clothEl,{yPercent:0,duration:0.5,ease:"power4.inOut",onUpdate:sway(1)})
-    .add(doSwap)
-    .to(clothEl,{yPercent:fwd?-102:102,duration:0.55,ease:"power4.inOut",onUpdate:sway(-1)});
+function settleTransition(){
+  if(transSettled)return;
+  transSettled=true;
+  if(transGuard){clearTimeout(transGuard);transGuard=null;}
+  var from=transFrom,n=transTo;
+  if(window.gsap){
+    if(from>=0){gsap.killTweensOf(chapters[from]);var sh0=chapters[from].querySelector(".turn-shade");if(sh0)gsap.killTweensOf(sh0);}
+    if(n>=0)gsap.killTweensOf(chapters[n]);
+  }
+  if(from>=0){
+    chapters[from].classList.remove("act");
+    cleanChapterFx(from);
+    if(from===2)chapters[2].classList.remove("exit");
+  }
+  if(n>=0){chapters[n].classList.add("act");cleanChapterFx(n);}
+  transFrom=-1;transTo=-1;
+  var d=transDone;transDone=null;
+  if(d)d();
+}
+function chapterTransition(from,n,onDone){
+  if(reduceMotion||!window.gsap){ /* instant swap — the old swap semantics */
+    chapters[from].classList.remove("act");
+    chapters[n].classList.add("act");
+    cur=n;onEnter(n,from);
+    if(from===2)setTimeout(function(){chapters[2].classList.remove("exit");},60);
+    onDone();return;
+  }
+  transFrom=from;transTo=n;transDone=onDone;transSettled=false;
+  transGuard=setTimeout(settleTransition,2200); /* force-settle if a tween is ever interrupted */
+  var out=chapters[from],inn=chapters[n];
+  if(n>from){ /* E · IRIS */
+    out.classList.remove("act");out.classList.add("under");
+    inn.classList.add("act");
+    cur=n;onEnter(n,from);
+    gsap.set(inn,{clipPath:"circle(0% at 50% 50%)"});
+    gsap.to(inn,{clipPath:"circle(120% at 50% 50%)",duration:0.8,ease:"power3.inOut",onComplete:settleTransition});
+  }else{ /* F · PAGE TURN */
+    inn.classList.add("under");
+    cur=n;onEnter(n,from);
+    var shade=out.querySelector(".turn-shade");
+    gsap.set(out,{transformPerspective:1600,transformOrigin:"right center",rotationY:0});
+    if(shade)gsap.set(shade,{opacity:0});
+    var tl=gsap.timeline({onComplete:settleTransition});
+    tl.to(out,{rotationY:72,duration:0.85,ease:"power3.inOut"},0);
+    if(shade)tl.to(shade,{opacity:0.55,duration:0.85,ease:"power3.inOut"},0);
+  }
 }
 
 /* ================= chapter state machine ================= */
@@ -135,11 +167,13 @@ function onEnter(n,from){
   setHeader();
 }
 function goChapter(n){
-  if(busy||n===cur||n<0||n>6||!loaderDone)return;
-  busy=true;wheelLockUntil=performance.now()+1150; /* lock covers the full 1.05s Fabric Drop */
+  if(n===cur||n<0||n>6||!loaderDone)return;
+  if(transFrom>=0)settleTransition(); /* a menu jump mid-flight: settle the current flight first */
+  if(busy)return;
+  busy=true;wheelLockUntil=performance.now()+(n>cur?900:950); /* lock covers the flight: iris .8s / page turn .85s */
   var from=cur;
   if(from===2&&n===3)chapters[2].classList.add("exit"); /* works exit: blur + rise */
-  fabricDrop(from,n,function(){busy=false;});
+  chapterTransition(from,n,function(){busy=false;});
 }
 
 /* ================= sub-scroller helper (px units, lerp .12, snap <.5) ================= */
@@ -567,6 +601,17 @@ function loaderStep(now){
   }
 }
 
+/* ================= per-chapter render (also used for the outgoing chapter during an E/F flight) ================= */
+function renderChapter(i,now){
+  if(i===0){if(heroPetals)heroPetals.draw(0.4+fluid.cur);}
+  else if(i===1){pxStep(aboutS);aboutBg.style.transform="translateY("+(-aboutS.cur*0.4)+"px) scale(1.06)";}
+  else if(i===2)worksRender();
+  else if(i===3){apRender();if(ap.phase===1&&apPetals)apPetals.draw(1);}
+  else if(i===4)omoiRender();
+  else if(i===5)flRender(now);
+  else if(i===6){pxStep(afterS);afterIn.style.transform="translateY("+(-afterS.cur)+"px)";}
+}
+
 /* ================= main rAF loop ================= */
 function raf(now){
   /* loader */
@@ -581,16 +626,10 @@ function raf(now){
   fluid.cur+=(fluid.tgt-fluid.cur)*0.05;
   /* chapters */
   if(loaderDone||cur===0){
-    if(cur===0&&heroPetals)heroPetals.draw(0.4+fluid.cur);
-    if(cur===1){pxStep(aboutS);aboutBg.style.transform="translateY("+(-aboutS.cur*0.4)+"px) scale(1.06)";}
-    if(cur===2)worksRender();
-    if(cur===3){apRender();if(ap.phase===1&&apPetals)apPetals.draw(1);}
-    if(cur===4)omoiRender();
-    if(cur===5)flRender(now);
+    if(cur===6&&lenisAfter){lenisAfter.raf(now);if(lenisFed){afterS.tgt=lenisTarget;lenisFed=false;}else{lenisTarget=afterS.tgt;}}
+    renderChapter(cur,now);
+    if(transFrom>=0&&transFrom!==cur)renderChapter(transFrom,now); /* outgoing chapter keeps rendering beneath the flight */
     if(cur===6){
-      if(lenisAfter){lenisAfter.raf(now);if(lenisFed){afterS.tgt=lenisTarget;lenisFed=false;}else{lenisTarget=afterS.tgt;}}
-      pxStep(afterS);
-      afterIn.style.transform="translateY("+(-afterS.cur)+"px)";
       var foot=afterIn.querySelector("footer");
       var fd=afterS.cur+vh()>foot.offsetTop+140;
       if(fd!==afterFooterDark){afterFooterDark=fd;setHeader();}

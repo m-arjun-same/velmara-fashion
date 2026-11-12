@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&family=Pinyon+Script&family=Shippori+Mincho+B1:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=9">
+<link rel="stylesheet" href="assets/css/style.css?v=10">
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 </head>
 <body>
@@ -25,8 +25,7 @@
   </div>
 </div>
 
-<!-- fabric drop cloth + grain overlays -->
-<div id="cloth" aria-hidden="true"><span class="cloth-script script">Velmara</span></div>
+<!-- film grain overlay -->
 <canvas id="grain" aria-hidden="true"></canvas>
 
 <!-- HEADER -->
@@ -75,6 +74,7 @@
 <main>
 <!-- CH 0 · HERO -->
 <section class="chapter" id="hero" data-theme="light">
+  <div class="turn-shade" aria-hidden="true"></div>
   <canvas id="petals"></canvas>
   <div class="hero-frame" id="heroFrame">
     <span class="br tl"></span><span class="br tr"></span><span class="br bl"></span><span class="br br2"></span>
@@ -94,6 +94,7 @@
 
 <!-- CH 1 · ABOUT -->
 <section class="chapter" id="about" data-theme="dark">
+  <div class="turn-shade" aria-hidden="true"></div>
   <img class="about-bg" id="aboutBg" src="assets/img/img04.jpg" alt="" aria-hidden="true">
   <div class="about-in">
     <div class="about-title">ABOUT<em class="script">Total Creation.</em></div>
@@ -109,6 +110,7 @@
 
 <!-- CH 2 · WORKS -->
 <section class="chapter" id="works" data-theme="light">
+  <div class="turn-shade" aria-hidden="true"></div>
   <div class="wk-framebar top"></div>
   <div class="wk-collage" id="wkCollage">
     <img src="assets/img/img01.jpg" alt=""><img src="assets/img/img07.jpg" alt=""><img src="assets/img/img10.jpg" alt=""><img src="assets/img/img12.jpg" alt=""><img src="assets/img/img02.jpg" alt=""><img src="assets/img/img09.jpg" alt=""><img src="assets/img/img14.jpg" alt="">
@@ -174,6 +176,7 @@
 
 <!-- CH 3 · APPROACH (intro + steps) -->
 <section class="chapter" id="approach" data-theme="light">
+  <div class="turn-shade" aria-hidden="true"></div>
   <div class="ap-phase ap-intro" id="apIntro">
     <span class="petal p1"></span><span class="petal p2"></span><span class="petal p3"></span><span class="petal p4"></span>
     <div class="ap-label">A P P R O A C H</div>
@@ -210,6 +213,7 @@
 
 <!-- CH 4 · PHILOSOPHY -->
 <section class="chapter" id="omoi" data-theme="dark">
+  <div class="turn-shade" aria-hidden="true"></div>
   <canvas id="omoiBurn"></canvas>
   <div class="omoi-in">
     <div class="omoi-word script">Style</div>
@@ -224,6 +228,7 @@
 
 <!-- CH 5 · FLOW — THE SEAM (own design) -->
 <section class="chapter" id="flow" data-theme="dark">
+  <div class="turn-shade" aria-hidden="true"></div>
   <div class="fl-phase fl-intro" id="flIntro">
     <div class="vel-seam" aria-hidden="true"><span class="seam-needle"></span><span class="seam-notch top">NOTCH 01</span><span class="seam-notch bot">CUT ON THE SEAM</span></div>
     <div class="fl-intro-side" aria-hidden="true">PATTERN No. 5 — THE MAKING</div>
@@ -274,6 +279,7 @@
 
 <!-- CH 6 · AFTER — THE SEAM CONTINUES (data / contact / footer, internal sub-scroller) -->
 <section class="chapter" id="after" data-theme="light">
+  <div class="turn-shade" aria-hidden="true"></div>
   <div class="after-in" id="afterIn">
     <div id="data">
       <div class="curtain-in">
@@ -347,6 +353,6 @@
 <script src="assets/js/vendor/gsap.min.js?v=7"></script>
 <script src="assets/js/vendor/ScrollTrigger.min.js?v=7"></script>
 <script src="assets/js/vendor/lenis.min.js?v=7"></script>
-<script src="assets/js/main.js?v=9"></script>
+<script src="assets/js/main.js?v=10"></script>
 </body>
 </html>
